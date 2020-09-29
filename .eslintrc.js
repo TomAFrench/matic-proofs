@@ -1,13 +1,10 @@
 module.exports = {
   parser: 'babel-eslint',
-  extends: 'airbnb/base',
+  extends: ['airbnb/base', "plugin:prettier/recommended"],
   env: {
     node: true,
     es6: true,
     mocha: true
-  },
-  rules: {
-    'space-before-function-paren': ['error', 'never']
   },
   globals: {
     contract: true,
