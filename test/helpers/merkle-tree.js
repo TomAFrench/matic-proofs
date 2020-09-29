@@ -1,7 +1,5 @@
 import { zeros, keccak256 } from 'ethereumjs-util';
 
-const sha3 = keccak256;
-
 export default class MerkleTree {
   constructor(leaves = []) {
     if (leaves.length < 1) {
@@ -32,7 +30,7 @@ export default class MerkleTree {
       const left = nodes[i];
       const right = nodes[i + 1];
       const data = Buffer.concat([left, right]);
-      treeLevel.push(sha3(data));
+      treeLevel.push(keccak256(data));
     }
 
     // is odd number of nodes
@@ -90,9 +88,9 @@ export default class MerkleTree {
     for (let i = 0; i < proof.length; i++) {
       const node = proof[i];
       if (index % 2 === 0) {
-        hash = sha3(Buffer.concat([hash, node]));
+        hash = keccak256(Buffer.concat([hash, node]));
       } else {
-        hash = sha3(Buffer.concat([node, hash]));
+        hash = keccak256(Buffer.concat([node, hash]));
       }
 
       index = parseInt(index / 2);
