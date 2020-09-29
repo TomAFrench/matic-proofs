@@ -2,7 +2,7 @@ import chai from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import chaiBN from 'chai-bn'
 import BN from 'bn.js'
-import { defaultAbiCoder as abi } from 'ethers/utils/abi-coder'
+import { defaultAbiCoder as abi } from '@ethersproject/abi'
 import { bufferToHex, rlp } from 'ethereumjs-util'
 
 import * as deployer from './helpers/deployer'

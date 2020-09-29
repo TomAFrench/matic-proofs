@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { Interface } from '@ethersproject/abi'
 import contracts from './contracts.js'
 
 export class LogDecoder {
@@ -6,7 +6,7 @@ export class LogDecoder {
     this._methodIDs = {}
     this._interfaces = []
     abis.forEach(abi => {
-      const methodInterface = new ethers.utils.Interface(abi)
+      const methodInterface = new Interface(abi)
       Object.keys(methodInterface.events).forEach(evtKey => {
         const evt = methodInterface.events[evtKey]
         const signature = evt.topic

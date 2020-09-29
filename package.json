@@ -32,6 +32,8 @@
     "mnemonics": "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
   },
   "devDependencies": {
+    "@ethersproject/abi": "^5.0.5",
+    "@ethersproject/rlp": "^5.0.3",
     "@openzeppelin/contracts": "^3.1.0",
     "@openzeppelin/test-helpers": "^0.5.5",
     "@truffle/hdwallet-provider": "^1.0.35",
@@ -61,7 +63,6 @@
     "ethereumjs-tx": "^2.1.2",
     "ethereumjs-util": "^7.0.2",
     "ethereumjs-wallet": "0.6.2",
-    "ethers": "^4.0.46",
     "fs": "0.0.1-security",
     "glob": "^7.1.6",
     "nunjucks": "^3.2.1",
@@ -69,6 +70,9 @@
     "truffle": "^5.1.21"
   },
   "dependencies": {
+    "@ethersproject/bignumber": "^5.0.7",
+    "@ethersproject/contracts": "^5.0.4",
+    "@ethersproject/providers": "^5.0.9",
     "ganache-cli": "^6.9.1"
   }
 }

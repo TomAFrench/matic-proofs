@@ -1,6 +1,5 @@
-import { RLP } from 'ethers/utils'
-import { AbiCoder } from 'ethers/utils'
-
+import { encode as rlpEncode } from '@ethersproject/rlp'
+import { AbiCoder } from '@ethersproject/abi'
 
 import {
   erc20TransferEventSig,
@@ -17,7 +16,7 @@ export const getERC20TransferLog = ({
   to,
   amount
 }) => {
-  return RLP.encode([
+  return rlpEncode([
     '0x0',
     [
       overrideSig || erc20TransferEventSig,
@@ -34,7 +33,7 @@ export const getERC721TransferLog = ({
   to,
   tokenId
 }) => {
-  return RLP.encode([
+  return rlpEncode([
     '0x0',
     [
       overrideSig || erc721TransferEventSig,
@@ -53,7 +52,7 @@ export const getERC1155TransferSingleLog = ({
   tokenId,
   amount
 }) => {
-  return RLP.encode([
+  return rlpEncode([
     '0x0',
     [
       overrideSig || erc1155TransferSingleEventSig,
@@ -73,7 +72,7 @@ export const getERC1155TransferBatchLog = ({
   tokenIds,
   amounts
 }) => {
-  return RLP.encode([
+  return rlpEncode([
     '0x0',
     [
       overrideSig || erc1155TransferBatchEventSig,
