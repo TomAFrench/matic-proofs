@@ -1,5 +1,4 @@
 import { zeros, keccak256 } from 'ethereumjs-util';
-import { Buffer } from 'safe-buffer';
 
 const sha3 = keccak256;
 
@@ -81,6 +80,7 @@ export default class MerkleTree {
     return proof;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   verify(value, index, root, proof) {
     if (!Array.isArray(proof) || !value || !root) {
       return false;
