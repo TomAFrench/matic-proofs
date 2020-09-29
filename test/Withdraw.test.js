@@ -5,11 +5,11 @@ import BN from 'bn.js'
 import { defaultAbiCoder as abi } from 'ethers/utils/abi-coder'
 import { bufferToHex, rlp } from 'ethereumjs-util'
 
-import * as deployer from '../helpers/deployer'
-import { mockValues } from '../helpers/constants'
-import { childWeb3 } from '../helpers/contracts'
-import logDecoder from '../helpers/log-decoder'
-import { submitCheckpoint } from '../helpers/checkpoint'
+import * as deployer from './helpers/deployer'
+import { mockValues } from './helpers/constants'
+import { childWeb3 } from './helpers/contracts'
+import logDecoder from './helpers/log-decoder'
+import { submitCheckpoint } from './helpers/checkpoint'
 
 // Enable and inject BN dependency
 chai

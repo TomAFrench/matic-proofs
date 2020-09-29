@@ -3,9 +3,9 @@ import chaiAsPromised from 'chai-as-promised'
 import chaiBN from 'chai-bn'
 import BN from 'bn.js'
 import { rlp } from 'ethereumjs-util'
-import block from '../mockResponses/347-block.json'
-import receiptList from '../mockResponses/347-receipt-list.json'
-import { getReceiptProof, verifyReceiptProof, getReceiptBytes } from '../helpers/proofs'
+import block from './mockResponses/347-block.json'
+import receiptList from './mockResponses/347-receipt-list.json'
+import { getReceiptProof, verifyReceiptProof, getReceiptBytes } from './helpers/proofs'
 
 const MerklePatriciaTest = artifacts.require('MerklePatriciaTest')
 
