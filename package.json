@@ -71,6 +71,7 @@
     "@ethersproject/bignumber": "^5.0.7",
     "@ethersproject/contracts": "^5.0.4",
     "@ethersproject/providers": "^5.0.9",
-    "ganache-cli": "^6.9.1"
+    "ganache-cli": "^6.9.1",
+    "merkle-patricia-tree": "2.3.2"
   }
 }
