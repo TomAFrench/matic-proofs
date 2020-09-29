@@ -9,7 +9,8 @@
     "bor": "cd test-blockchain && bash run-docker.sh",
     "bor:clean": "cd test-blockchain && bash stop-docker.sh",
     "truffle": "truffle",
-    "build": "truffle compile",
+    "build": "tsc",
+    "compile": "truffle compile",
     "test": "truffle test",
     "lint": "npm run lint:sol && npm run lint:js",
     "lint:js": "eslint test/**/*.js",
@@ -63,7 +64,8 @@
     "glob": "^7.1.6",
     "nunjucks": "^3.2.1",
     "solium": "^1.2.5",
-    "truffle": "^5.1.21"
+    "truffle": "^5.1.21",
+    "typescript": "^3.9.7"
   },
   "dependencies": {
     "@ethersproject/bignumber": "^5.0.7",
