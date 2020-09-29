@@ -1,11 +1,3 @@
-const bluebird = require('bluebird')
-
-const Merkle = artifacts.require('Merkle')
-const MerklePatriciaProof = artifacts.require('MerklePatriciaProof')
-const RLPReader = artifacts.require('RLPReader')
-const SafeERC20 = artifacts.require('SafeERC20')
-const SafeMath = artifacts.require('SafeMath')
-
 const RootChainManager = artifacts.require('RootChainManager')
 const RootChainManagerProxy = artifacts.require('RootChainManagerProxy')
 const DummyStateSender = artifacts.require('DummyStateSender')
