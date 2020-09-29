@@ -50,6 +50,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-bn": "^0.2.1",
+    "ganache-cli": "^6.9.1",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-typescript-prettier": "^3.1.0",
     "eth-block-tracker": "^4.4.3",
@@ -73,7 +74,6 @@
     "bn.js": "^5.1.1",
     "ethereumjs-block": "^2.2.2",
     "ethereumjs-util": "^7.0.5",
-    "ganache-cli": "^6.9.1",
     "merkle-patricia-tree": "^4.0.0"
   }
 }
