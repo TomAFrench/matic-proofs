@@ -1,19 +1,17 @@
-import { zeros, keccak256 } from 'ethereumjs-util';
+import { zeros, keccak256 } from "ethereumjs-util";
 
 export default class MerkleTree {
   constructor(leaves = []) {
     if (leaves.length < 1) {
-      throw new Error('Atleast 1 leaf needed');
+      throw new Error("Atleast 1 leaf needed");
     }
 
     const depth = Math.ceil(Math.log(leaves.length) / Math.log(2));
     if (depth > 20) {
-      throw new Error('Depth must be 20 or less');
+      throw new Error("Depth must be 20 or less");
     }
 
-    const l = leaves.concat(
-      Array.from(Array(Math.pow(2, depth) - leaves.length), () => zeros(32)),
-    );
+    const l = leaves.concat(Array.from(Array(Math.pow(2, depth) - leaves.length), () => zeros(32)));
 
     this.leaves = l;
     this.layers = [l];
@@ -56,7 +54,7 @@ export default class MerkleTree {
 
   getProof(leaf) {
     let index = -1;
-    for (let i = 0; i < this.leaves.length; i++) {
+    for (let i = 0; i < this.leaves.length; i += 1) {
       if (Buffer.compare(leaf, this.leaves[i]) === 0) {
         index = i;
       }
@@ -65,7 +63,7 @@ export default class MerkleTree {
     const proof = [];
     if (index <= this.getLeaves().length) {
       let siblingIndex;
-      for (let i = 0; i < this.layers.length - 1; i++) {
+      for (let i = 0; i < this.layers.length - 1; i += 1) {
         if (index % 2 === 0) {
           siblingIndex = index + 1;
         } else {
@@ -85,7 +83,7 @@ export default class MerkleTree {
     }
 
     let hash = value;
-    for (let i = 0; i < proof.length; i++) {
+    for (let i = 0; i < proof.length; i += 1) {
       const node = proof[i];
       if (index % 2 === 0) {
         hash = keccak256(Buffer.concat([hash, node]));

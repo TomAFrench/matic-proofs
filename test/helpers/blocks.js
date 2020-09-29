@@ -1,5 +1,5 @@
-import { keccak256, BN, toBuffer } from 'ethereumjs-util';
-import { Buffer } from 'safe-buffer';
+import { keccak256, BN, toBuffer } from "ethereumjs-util";
+import { Buffer } from "safe-buffer";
 
 const sha3 = keccak256;
 
@@ -14,9 +14,9 @@ export async function getHeaders(start, end, web3) {
   while (current <= end) {
     p = [];
 
-    for (let i = 0; i < 10 && current <= end; i++) {
+    for (let i = 0; i < 10 && current <= end; i += 1) {
       p.push(web3.eth.getBlock(current));
-      current++;
+      current += 1;
     }
 
     if (p.length > 0) {
@@ -28,8 +28,8 @@ export async function getHeaders(start, end, web3) {
 }
 
 export function getBlockHeader(block) {
-  const n = new BN(block.number).toArrayLike(Buffer, 'be', 32);
-  const ts = new BN(block.timestamp).toArrayLike(Buffer, 'be', 32);
+  const n = new BN(block.number).toArrayLike(Buffer, "be", 32);
+  const ts = new BN(block.timestamp).toArrayLike(Buffer, "be", 32);
   const txRoot = toBuffer(block.transactionsRoot);
   const receiptsRoot = toBuffer(block.receiptsRoot);
   return sha3(Buffer.concat([n, ts, txRoot, receiptsRoot]));

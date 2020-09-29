@@ -1,13 +1,13 @@
-import { Interface } from '@ethersproject/abi';
-import contracts from './contracts.js';
+import { Interface } from "@ethersproject/abi";
+import contracts from "./contracts.js";
 
 export class LogDecoder {
   constructor(abis = []) {
     this._methodIDs = {};
     this._interfaces = [];
-    abis.forEach((abi) => {
+    abis.forEach(abi => {
       const methodInterface = new Interface(abi);
-      Object.keys(methodInterface.events).forEach((evtKey) => {
+      Object.keys(methodInterface.events).forEach(evtKey => {
         const evt = methodInterface.events[evtKey];
         const signature = evt.topic;
         // Handles different indexed arguments with same signature from different contracts
@@ -20,8 +20,8 @@ export class LogDecoder {
   }
 
   decodeLogs(logs = []) {
-    return logs.map((log) => {
-      for (let i = 0; i < this._interfaces.length; i++) {
+    return logs.map(log => {
+      for (let i = 0; i < this._interfaces.length; i += 1) {
         try {
           const parsedLog = this._interfaces[i].parseLog(log);
           if (parsedLog) {
@@ -32,8 +32,7 @@ export class LogDecoder {
               args: parsedLog.values,
             };
           }
-        } catch (e) {
-        }
+        } catch (e) {}
       }
     });
   }
@@ -41,7 +40,7 @@ export class LogDecoder {
 
 const abis = [];
 
-Object.keys(contracts).forEach((c) => {
+Object.keys(contracts).forEach(c => {
   abis.push(contracts[c]._json.abi);
 });
 
