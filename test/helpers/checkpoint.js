@@ -1,22 +1,24 @@
-import { bufferToHex } from 'ethereumjs-util'
+import { bufferToHex } from 'ethereumjs-util';
 
-import MerkleTree from '../helpers/merkle-tree'
-import { getTxBytes, getReceiptBytes, getReceiptProof, getTxProof, verifyTxProof } from '../helpers/proofs'
-import { getBlockHeader } from '../helpers/blocks'
-import { childWeb3 } from '../helpers/contracts'
+import MerkleTree from './merkle-tree';
+import {
+  getTxBytes, getReceiptBytes, getReceiptProof, getTxProof, verifyTxProof,
+} from './proofs';
+import { getBlockHeader } from './blocks';
+import { childWeb3 } from './contracts';
 
-let headerNumber = 0
+let headerNumber = 0;
 export async function build(event) {
-  const blockHeader = getBlockHeader(event.block)
-  const tree = new MerkleTree([blockHeader])
-  const receiptProof = await getReceiptProof(event.receipt, event.block, null /* web3 */, [event.receipt])
-  const txProof = await getTxProof(event.tx, event.block)
+  const blockHeader = getBlockHeader(event.block);
+  const tree = new MerkleTree([blockHeader]);
+  const receiptProof = await getReceiptProof(event.receipt, event.block, null /* web3 */, [event.receipt]);
+  const txProof = await getTxProof(event.tx, event.block);
   assert.ok(
     verifyTxProof(receiptProof),
-    'verify receipt proof failed in js'
-  )
+    'verify receipt proof failed in js',
+  );
 
-  headerNumber += 1
+  headerNumber += 1;
   return {
     header: { number: headerNumber, root: tree.getRoot(), start: event.receipt.blockNumber },
     receipt: getReceiptBytes(event.receipt), // rlp encoded
@@ -25,38 +27,38 @@ export async function build(event) {
     txParentNodes: txProof.parentNodes,
     path: Buffer.concat([
       Buffer.from('00', 'hex'),
-      receiptProof.path
+      receiptProof.path,
     ]),
     number: event.receipt.blockNumber,
     timestamp: event.block.timestamp,
     transactionsRoot: Buffer.from(event.block.transactionsRoot.slice(2), 'hex'),
     receiptsRoot: Buffer.from(event.block.receiptsRoot.slice(2), 'hex'),
-    proof: await tree.getProof(blockHeader)
-  }
+    proof: await tree.getProof(blockHeader),
+  };
 }
 
 // submit checkpoint
 export async function submitCheckpoint(checkpointManager, receiptObj) {
-  const tx = await childWeb3.eth.getTransaction(receiptObj.transactionHash)
+  const tx = await childWeb3.eth.getTransaction(receiptObj.transactionHash);
   const receipt = await childWeb3.eth.getTransactionReceipt(
-    receiptObj.transactionHash
-  )
+    receiptObj.transactionHash,
+  );
   const block = await childWeb3.eth.getBlock(
     receipt.blockHash,
-    true /* returnTransactionObjects */
-  )
+    true, /* returnTransactionObjects */
+  );
   const event = {
     tx,
     receipt,
-    block
-  }
+    block,
+  };
   // build checkpoint
-  const checkpointData = await build(event)
-  const root = bufferToHex(checkpointData.header.root)
+  const checkpointData = await build(event);
+  const root = bufferToHex(checkpointData.header.root);
 
   // submit checkpoint including burn (withdraw) tx
-  await checkpointManager.setCheckpoint(root, block.number, block.number)
+  await checkpointManager.setCheckpoint(root, block.number, block.number);
 
   // return checkpoint data
-  return checkpointData
+  return checkpointData;
 }
