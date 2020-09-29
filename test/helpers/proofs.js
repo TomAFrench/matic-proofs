@@ -2,17 +2,7 @@ import { BaseTrie as Trie } from "merkle-patricia-tree";
 import { rlp, keccak256, toBuffer } from "ethereumjs-util";
 import { Transaction } from "ethereumjs-tx";
 import Common from "ethereumjs-common";
-import EthereumBlock from "ethereumjs-block/from-rpc";
-
-// raw header
-function getRawHeader(_block) {
-  if (typeof _block.difficulty !== "string") {
-    _block.difficulty = `0x${_block.difficulty.toString(16)}`;
-  }
-
-  const block = new EthereumBlock(_block);
-  return block.header;
-}
+import blockHeaderFromRpc from "ethereumjs-block/header-from-rpc";
 
 // squanch transaction
 export function squanchTx(tx) {
@@ -63,7 +53,7 @@ export async function getTxProof(tx, block) {
   return {
     blockHash: toBuffer(tx.blockHash),
     parentNodes: stack.map(trieNode => trieNode.raw()),
-    root: getRawHeader(block).transactionsTrie,
+    root: blockHeaderFromRpc(block).transactionsTrie,
     path: rlp.encode(tx.transactionIndex),
     value: rlp.decode(node.value),
   };
@@ -249,7 +239,7 @@ export async function getReceiptProof(receipt, block, web3, receipts) {
   return {
     blockHash: toBuffer(receipt.blockHash),
     parentNodes: stack.map(trieNode => trieNode.raw()),
-    root: getRawHeader(block).receiptTrie,
+    root: blockHeaderFromRpc(block).receiptTrie,
     path: rlp.encode(receipt.transactionIndex),
     value: rlp.decode(node.value),
   };
