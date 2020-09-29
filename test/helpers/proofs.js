@@ -1,4 +1,4 @@
-import Trie from "merkle-patricia-tree";
+import { BaseTrie as Trie } from "merkle-patricia-tree";
 import { rlp, keccak256, toBuffer } from "ethereumjs-util";
 import { Transaction } from "ethereumjs-tx";
 import Common from "ethereumjs-common";
@@ -51,37 +51,43 @@ export async function getTxProof(tx, block) {
     const siblingTx = block.transactions[i];
     const path = rlp.encode(siblingTx.transactionIndex);
     const rawSignedSiblingTx = getTxBytes(siblingTx);
-    await new Promise((resolve, reject) => {
-      txTrie.put(path, rawSignedSiblingTx, err => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+    await txTrie.put(path, rawSignedSiblingTx);
   }
 
-  // promise
-  return new Promise((resolve, reject) => {
-    txTrie.findPath(rlp.encode(tx.transactionIndex), (err, rawTxNode, reminder, stack) => {
-      if (err) {
-        return reject(err);
-      }
+  const { node, remaining, stack } = await txTrie.findPath(rlp.encode(tx.transactionIndex));
 
-      if (reminder.length > 0) {
-        return reject(new Error("Node does not contain the key"));
-      }
-      const prf = {
-        blockHash: toBuffer(tx.blockHash),
-        parentNodes: stack.map(s => s.raw),
-        root: getRawHeader(block).transactionsTrie,
-        path: rlp.encode(tx.transactionIndex),
-        value: rlp.decode(rawTxNode.value),
-      };
-      resolve(prf);
-    });
-  });
+  if (node === null || remaining.length > 0) {
+    throw new Error("Node does not contain the key");
+  }
+
+  return {
+    blockHash: toBuffer(tx.blockHash),
+    parentNodes: stack.map(trieNode => trieNode.raw()),
+    root: getRawHeader(block).transactionsTrie,
+    path: rlp.encode(tx.transactionIndex),
+    value: rlp.decode(node.value),
+  };
+
+  // // promise
+  // return new Promise((resolve, reject) => {
+  //   txTrie.findPath(rlp.encode(tx.transactionIndex), (err, rawTxNode, reminder, stack) => {
+  //     if (err) {
+  //       return reject(err);
+  //     }
+
+  //     if (reminder.length > 0) {
+  //       return reject(new Error("Node does not contain the key"));
+  //     }
+  //     const prf = {
+  //       blockHash: toBuffer(tx.blockHash),
+  //       parentNodes: stack.map(s => s.raw),
+  //       root: getRawHeader(block).transactionsTrie,
+  //       path: rlp.encode(tx.transactionIndex),
+  //       value: rlp.decode(rawTxNode.value),
+  //     };
+  //     resolve(prf);
+  //   });
+  // });
 }
 
 export function verifyTxProof(proof) {
@@ -231,38 +237,44 @@ export async function getReceiptProof(receipt, block, web3, receipts) {
     const siblingReceipt = receipts[i];
     const path = rlp.encode(siblingReceipt.transactionIndex);
     const rawReceipt = getReceiptBytes(siblingReceipt);
-    await new Promise((resolve, reject) => {
-      receiptsTrie.put(path, rawReceipt, err => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
+    await receiptsTrie.put(path, rawReceipt);
   }
 
-  // promise
-  return new Promise((resolve, reject) => {
-    receiptsTrie.findPath(rlp.encode(receipt.transactionIndex), (err, rawReceiptNode, reminder, stack) => {
-      if (err) {
-        return reject(err);
-      }
+  const { node, remaining, stack } = await receiptsTrie.findPath(rlp.encode(receipt.transactionIndex));
 
-      if (reminder.length > 0) {
-        return reject(new Error("Node does not contain the key"));
-      }
+  if (node === null || remaining.length > 0) {
+    throw new Error("Node does not contain the key");
+  }
 
-      const prf = {
-        blockHash: toBuffer(receipt.blockHash),
-        parentNodes: stack.map(s => s.raw),
-        root: getRawHeader(block).receiptTrie,
-        path: rlp.encode(receipt.transactionIndex),
-        value: rlp.decode(rawReceiptNode.value),
-      };
-      resolve(prf);
-    });
-  });
+  return {
+    blockHash: toBuffer(receipt.blockHash),
+    parentNodes: stack.map(trieNode => trieNode.raw()),
+    root: getRawHeader(block).receiptTrie,
+    path: rlp.encode(receipt.transactionIndex),
+    value: rlp.decode(node.value),
+  };
+
+  // // promise
+  // return new Promise((resolve, reject) => {
+  //   receiptsTrie.findPath(rlp.encode(receipt.transactionIndex), (err, rawReceiptNode, reminder, stack) => {
+  //     if (err) {
+  //       return reject(err);
+  //     }
+
+  //     if (reminder.length > 0) {
+  //       return reject(new Error("Node does not contain the key"));
+  //     }
+
+  //     const prf = {
+  //       blockHash: toBuffer(receipt.blockHash),
+  //       parentNodes: stack.map(s => s.raw),
+  //       root: getRawHeader(block).receiptTrie,
+  //       path: rlp.encode(receipt.transactionIndex),
+  //       value: rlp.decode(rawReceiptNode.value),
+  //     };
+  //     resolve(prf);
+  //   });
+  // });
 }
 
 export function verifyReceiptProof(proof) {
