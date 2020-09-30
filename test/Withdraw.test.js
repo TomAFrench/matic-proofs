@@ -5,12 +5,14 @@ import BN from "bn.js";
 import { defaultAbiCoder as abi } from "@ethersproject/abi";
 import { bufferToHex, rlp } from "ethereumjs-util";
 
+import { JsonRpcProvider } from "@ethersproject/providers";
 import * as deployer from "./helpers/deployer";
-import { mockValues } from "./helpers/constants";
+import { childRPC, erc20TransferEventSig, mockValues, rootRPC } from "./helpers/constants";
 import { childWeb3 } from "./helpers/contracts";
 import logDecoder from "./helpers/log-decoder";
 import { submitCheckpoint } from "./helpers/checkpoint";
 
+import { buildPayloadForExit, encodePayload } from "../lib/index";
 // Enable and inject BN dependency
 chai.use(chaiAsPromised).use(chaiBN(BN)).should();
 
@@ -119,22 +121,38 @@ contract("RootChainManager", async accounts => {
       root.should.equal(headerData.root);
     });
 
-    it("Should start exit", async () => {
-      const logIndex = 0;
-      const data = bufferToHex(
-        rlp.encode([
-          headerNumber,
-          bufferToHex(Buffer.concat(checkpointData.proof)),
-          checkpointData.number,
-          checkpointData.timestamp,
-          bufferToHex(checkpointData.transactionsRoot),
-          bufferToHex(checkpointData.receiptsRoot),
-          bufferToHex(checkpointData.receipt),
-          bufferToHex(rlp.encode(checkpointData.receiptParentNodes)),
-          bufferToHex(checkpointData.path), // branch mask,
-          logIndex,
-        ]),
+    // it("Should start exit using checkpoint", async () => {
+    //   const logIndex = 0;
+    //   const data = bufferToHex(
+    //     rlp.encode([
+    //       headerNumber,
+    //       bufferToHex(Buffer.concat(checkpointData.proof)),
+    //       checkpointData.number,
+    //       checkpointData.timestamp,
+    //       bufferToHex(checkpointData.transactionsRoot),
+    //       bufferToHex(checkpointData.receiptsRoot),
+    //       bufferToHex(checkpointData.receipt),
+    //       bufferToHex(rlp.encode(checkpointData.receiptParentNodes)),
+    //       bufferToHex(checkpointData.path), // branch mask,
+    //       logIndex,
+    //     ]),
+    //   );
+    //   // start exit
+    //   exitTx = await contracts.root.rootChainManager.exit(data, { from: depositReceiver });
+    //   should.exist(exitTx);
+    // });
+
+    it("Should start exit using sdk", async () => {
+      const payload = await buildPayloadForExit(
+        new JsonRpcProvider(rootRPC),
+        new JsonRpcProvider(childRPC),
+        contracts.root.rootChainManager.address,
+        withdrawTx.tx,
+        erc20TransferEventSig,
       );
+      console.log("payload", payload);
+      const data = encodePayload(payload);
+      console.log("encoded data", data);
       // start exit
       exitTx = await contracts.root.rootChainManager.exit(data, { from: depositReceiver });
       should.exist(exitTx);
