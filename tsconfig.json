@@ -19,6 +19,6 @@
     "strict": true,
     "resolveJsonModule": true
   },
-  "include": ["src", "test"],
-  "exclude": ["node_modules", "lib", "scripts"]
+  "include": ["src"],
+  "exclude": ["node_modules", "lib", "test"]
 }
