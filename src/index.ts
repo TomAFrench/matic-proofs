@@ -26,7 +26,7 @@ export const encodePayload = ({
   bufferToHex(
     rlp.encode([
       headerBlockNumber,
-      blockProof,
+      bufferToHex(Buffer.concat(blockProof)),
       burnTxBlockNumber,
       burnTxBlockTimestamp,
       bufferToHex(transactionsRoot),

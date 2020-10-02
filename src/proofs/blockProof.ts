@@ -1,7 +1,7 @@
 import { JsonRpcProvider } from "@ethersproject/providers";
 import BN from "bn.js";
 
-import { toBuffer, keccak256, bufferToHex } from "ethereumjs-util";
+import { toBuffer, keccak256 } from "ethereumjs-util";
 import { BigNumber } from "@ethersproject/bignumber";
 import MerkleTree from "../utils/merkleTree";
 import { getFullBlockByNumber } from "../utils/blocks";
@@ -29,10 +29,9 @@ export const buildBlockProof = async (
   start: number,
   end: number,
   blockNumber: number,
-): Promise<string> => {
-  console.log("building tree", start, end, blockNumber);
+): Promise<Buffer[]> => {
   const tree = await buildBlockHeaderMerkle(maticChainProvider, start, end);
   const blockHeader = getBlockHeader(await getFullBlockByNumber(maticChainProvider, blockNumber));
   const proof = tree.getProof(blockHeader);
-  return bufferToHex(Buffer.concat(proof));
+  return proof;
 };

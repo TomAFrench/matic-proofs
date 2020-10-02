@@ -18,10 +18,10 @@ export type ReceiptProof = {
 };
 
 export interface ExitProof {
-  headerBlockNumber: string;
-  blockProof: any;
-  burnTxBlockNumber: string;
-  burnTxBlockTimestamp: string;
+  headerBlockNumber: number;
+  blockProof: Buffer[];
+  burnTxBlockNumber: number;
+  burnTxBlockTimestamp: number;
   transactionsRoot: Buffer;
   receiptsRoot: Buffer;
   receipt: Buffer;
