@@ -31,7 +31,8 @@ export const buildBlockProof = async (
   blockNumber: number,
 ): Promise<Buffer[]> => {
   const tree = await buildBlockHeaderMerkle(maticChainProvider, start, end);
-  const blockHeader = getBlockHeader(await getFullBlockByNumber(maticChainProvider, blockNumber));
+  const burnTxBlock = await getFullBlockByNumber(maticChainProvider, blockNumber);
+  const blockHeader = getBlockHeader(burnTxBlock);
   const proof = tree.getProof(blockHeader);
   return proof;
 };
