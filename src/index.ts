@@ -10,6 +10,7 @@ import { ExitProof, RequiredBlockMembers } from "./types";
 import { buildBlockProof } from "./proofs/blockProof";
 import { getReceiptBytes, getReceiptProof } from "./proofs/receiptProof";
 import { findHeaderBlockNumber, getFullBlockByHash } from "./utils/blocks";
+import { getLogIndex } from "./utils/logIndex";
 
 export { getReceiptProof } from "./proofs/receiptProof";
 
@@ -54,10 +55,7 @@ export const isBurnTxProcessed = async (
     throw new Error("Could not find find blocknumber of burn transaction");
   }
 
-  const logIndex = burnTxReceipt.logs.findIndex(log => log.topics[0].toLowerCase() === logEventSig.toLowerCase());
-  if (logIndex === -1) {
-    throw new Error("Log not found in receipt");
-  }
+  const logIndex = getLogIndex(burnTxReceipt, logEventSig);
 
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
   const receiptProof = await getReceiptProof(maticChainProvider, burnTxReceipt, burnTxBlock);
@@ -119,10 +117,7 @@ export const buildPayloadForExit = async (
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTx.blockHash);
   const receipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
 
-  const logIndex = receipt.logs.findIndex(log => log.topics[0].toLowerCase() === logEventSig.toLowerCase());
-  if (logIndex === -1) {
-    throw new Error("Log not found in receipt");
-  }
+  const logIndex = getLogIndex(receipt, logEventSig);
 
   const receiptProof = await getReceiptProof(maticChainProvider, receipt, burnTxBlock);
 
