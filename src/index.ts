@@ -2,7 +2,7 @@ import { Contract } from "@ethersproject/contracts";
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 
-import { bufferToHex, rlp } from "ethereumjs-util";
+import { bufferToHex, keccak256, rlp } from "ethereumjs-util";
 import checkpointManagerABI from "./abi/ICheckpointManager.json";
 import rootChainABI from "./abi/RootChainManager.json";
 
@@ -10,6 +10,8 @@ import { ExitProof, RequiredBlockMembers } from "./types";
 import { buildBlockProof } from "./proofs/blockProof";
 import { getReceiptBytes, getReceiptProof } from "./proofs/receiptProof";
 import { findHeaderBlockNumber, getFullBlockByHash } from "./utils/blocks";
+
+export { getReceiptProof } from "./proofs/receiptProof";
 
 export const encodePayload = ({
   headerBlockNumber,
@@ -38,7 +40,33 @@ export const encodePayload = ({
     ]),
   );
 
-const isBurnTxCheckPointed = async (
+export const isBurnTxProcessed = async (
+  rootChainProvider: Provider,
+  maticChainProvider: JsonRpcProvider,
+  rootChainContractAddress: string,
+  burnTxHash: string,
+  logEventSig: string,
+): Promise<boolean> => {
+  const rootChainContract = new Contract(rootChainContractAddress, rootChainABI, rootChainProvider);
+
+  const burnTxReceipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
+  if (typeof burnTxReceipt.blockNumber === "undefined") {
+    throw new Error("Could not find find blocknumber of burn transaction");
+  }
+
+  const logIndex = burnTxReceipt.logs.findIndex(log => log.topics[0].toLowerCase() === logEventSig.toLowerCase());
+  if (logIndex === -1) {
+    throw new Error("Log not found in receipt");
+  }
+
+  const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
+  const receiptProof = await getReceiptProof(maticChainProvider, burnTxReceipt, burnTxBlock);
+
+  const exitHash = keccak256(Buffer.from([burnTxReceipt.blockNumber, receiptProof.parentNodes, logIndex]));
+  return rootChainContract.processedExits(exitHash);
+};
+
+export const isBurnTxCheckPointed = async (
   rootChainProvider: Provider,
   rootChainContractAddress: string,
   burnTxBlockNumber: BigNumberish,
