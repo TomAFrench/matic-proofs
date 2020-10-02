@@ -11,6 +11,7 @@ import { childRPC, erc20TransferEventSig, mockValues, rootRPC } from "./helpers/
 import { childWeb3 } from "./helpers/contracts";
 import logDecoder from "./helpers/log-decoder";
 import { submitCheckpoint } from "./helpers/checkpoint";
+import { assertBigNumberEquality } from './helpers/utils';
 
 import { buildPayloadForExit, encodePayload } from "../lib/index";
 // Enable and inject BN dependency
@@ -142,7 +143,7 @@ contract("RootChainManager", async accounts => {
     //   should.exist(exitTx);
     // });
 
-    it("Should start exit using sdk", async () => {
+    it("Should match checkpoint", async () => {
       const payload = await buildPayloadForExit(
         new JsonRpcProvider(rootRPC),
         new JsonRpcProvider(childRPC),
@@ -150,28 +151,48 @@ contract("RootChainManager", async accounts => {
         withdrawTx.tx,
         erc20TransferEventSig,
       );
-      console.log("payload", payload);
-      const data = encodePayload(payload);
-      console.log("encoded data", data);
-      // start exit
-      exitTx = await contracts.root.rootChainManager.exit(data, { from: depositReceiver });
-      should.exist(exitTx);
+
+      assertBigNumberEquality(payload.headerBlockNumber, headerNumber)
+      assertBigNumberEquality(payload.burnTxBlockNumber, checkpointData.number)
+      assertBigNumberEquality(payload.burnTxBlockTimestamp, checkpointData.timestamp)
+      bufferToHex(payload.transactionsRoot).should.equal(bufferToHex(checkpointData.transactionsRoot))
+      bufferToHex(payload.receiptsRoot).should.equal(bufferToHex(checkpointData.receiptsRoot))
+      bufferToHex(payload.receipt).should.equal(bufferToHex(checkpointData.receipt))
+            // payload.receiptProofParentNodes.should.equal(checkpointData.receiptParentNodes)
+      bufferToHex(payload.receiptProofPath).should.equal(bufferToHex(checkpointData.path))
+      assertBigNumberEquality(payload.logIndex,1)
     });
 
-    it("Should emit Transfer log in exit tx", () => {
-      const logs = logDecoder.decodeLogs(exitTx.receipt.rawLogs);
-      const exitTransferLog = logs.find(l => l.event === "Transfer");
-      should.exist(exitTransferLog);
-    });
+    // it("Should start exit using sdk", async () => {
+    //   const payload = await buildPayloadForExit(
+    //     new JsonRpcProvider(rootRPC),
+    //     new JsonRpcProvider(childRPC),
+    //     contracts.root.rootChainManager.address,
+    //     withdrawTx.tx,
+    //     erc20TransferEventSig,
+    //   );
+    //   console.log("payload", payload)
+    //   const data = encodePayload(payload);
+    //   // start exit
+    //   exitTx = await contracts.root.rootChainManager.exit(data, { from: depositReceiver });
+    //   should.exist(exitTx);
+    // });
 
-    it("Should have more amount in withdrawer account after withdraw", async () => {
-      const newAccountBalance = await dummyERC20.balanceOf(depositReceiver);
-      newAccountBalance.should.be.a.bignumber.that.equals(accountBalance.add(depositAmount));
-    });
+    // it("Should emit Transfer log in exit tx", () => {
+    //   console.log(exitTx)
+    //   const logs = logDecoder.decodeLogs(exitTx.receipt.rawLogs);
+    //   const exitTransferLog = logs.find(l => l.event === "Transfer");
+    //   should.exist(exitTransferLog);
+    // });
 
-    it("Should have less amount in predicate contract after withdraw", async () => {
-      const newContractBalance = await dummyERC20.balanceOf(contracts.root.erc20Predicate.address);
-      newContractBalance.should.be.a.bignumber.that.equals(contractBalance.sub(withdrawAmount));
-    });
+    // it("Should have more amount in withdrawer account after withdraw", async () => {
+    //   const newAccountBalance = await dummyERC20.balanceOf(depositReceiver);
+    //   newAccountBalance.should.be.a.bignumber.that.equals(accountBalance.add(depositAmount));
+    // });
+
+    // it("Should have less amount in predicate contract after withdraw", async () => {
+    //   const newContractBalance = await dummyERC20.balanceOf(contracts.root.erc20Predicate.address);
+    //   newContractBalance.should.be.a.bignumber.that.equals(contractBalance.sub(withdrawAmount));
+    // });
   });
 });
