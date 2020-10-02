@@ -82,8 +82,8 @@ export const buildPayloadForExit = async (
 
   const blockProof = await buildBlockProof(
     maticChainProvider,
-    parseInt(headerBlock.start, 10),
-    parseInt(headerBlock.end, 10),
+    BigNumber.from(headerBlock.start).toNumber(),
+    BigNumber.from(headerBlock.end).toNumber(),
     burnTx.blockNumber,
   );
 
@@ -99,10 +99,10 @@ export const buildPayloadForExit = async (
   const receiptProof = await getReceiptProof(maticChainProvider, receipt, burnTxBlock);
 
   return {
-    headerBlockNumber: headerBlockNumber.toHexString(),
+    headerBlockNumber: headerBlockNumber.toNumber(),
     blockProof,
-    burnTxBlockNumber: BigNumber.from(burnTx.blockNumber).toHexString(),
-    burnTxBlockTimestamp: burnTxBlock.timestamp,
+    burnTxBlockNumber: BigNumber.from(burnTx.blockNumber).toNumber(),
+    burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),
     transactionsRoot: Buffer.from(burnTxBlock.transactionsRoot.slice(2), "hex"),
     receiptsRoot: Buffer.from(burnTxBlock.receiptsRoot.slice(2), "hex"),
     receipt: getReceiptBytes(receipt), // rlp encoded

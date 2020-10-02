@@ -2,6 +2,7 @@ import { Provider, TransactionReceipt } from "@ethersproject/providers";
 import { BaseTrie } from "merkle-patricia-tree";
 import { rlp, toBuffer } from "ethereumjs-util";
 import blockHeaderFromRpc from "ethereumjs-block/header-from-rpc";
+import { BigNumber } from "@ethersproject/bignumber";
 import { ReceiptProof, RequiredBlockMembers } from "../types";
 
 export const getReceiptBytes = (receipt: TransactionReceipt): Buffer => {
@@ -10,7 +11,7 @@ export const getReceiptBytes = (receipt: TransactionReceipt): Buffer => {
       // eslint-disable-next-line no-nested-ternary
       receipt.status !== undefined && receipt.status != null ? (receipt.status ? "0x1" : "0x") : receipt.root,
     ),
-    toBuffer(receipt.cumulativeGasUsed.toHexString()),
+    toBuffer(BigNumber.from(receipt.cumulativeGasUsed).toHexString()),
     toBuffer(receipt.logsBloom),
 
     // encoded log array
