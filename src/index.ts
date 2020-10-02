@@ -78,10 +78,7 @@ export const buildPayloadForExit = async (
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
   const headerBlockNumber = await findHeaderBlockNumber(checkpointManagerContract, burnTx.blockNumber);
-  console.log("Got header blockNumber", headerBlockNumber);
-
-  const headerBlock = await checkpointManagerContract.headerBlocks(headerBlockNumber);
-  console.log("Got header block", headerBlock);
+  const headerBlock = await checkpointManagerContract.headerBlocks(headerBlockNumber.toString());
 
   const blockProof = await buildBlockProof(
     maticChainProvider,
@@ -89,7 +86,6 @@ export const buildPayloadForExit = async (
     parseInt(headerBlock.end, 10),
     burnTx.blockNumber,
   );
-  console.log("Built block proof");
 
   // Build proof that the burn transaction is included in this block.
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTx.blockHash);

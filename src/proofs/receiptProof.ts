@@ -36,26 +36,17 @@ export const getReceiptProof = async (
     // eslint-disable-next-line no-param-reassign
     receipts = await Promise.all(block.transactions.map(tx => provider.getTransactionReceipt(tx)));
   }
-  console.log("built receipts", receipts, "from", block.transactions);
 
   // Add all receipts to the trie
   for (let i = 0; i < receipts.length; i += 1) {
     const siblingReceipt = receipts[i];
     const path = rlp.encode(siblingReceipt.transactionIndex);
-    console.log("receiptPath", path);
     const rawReceipt = getReceiptBytes(siblingReceipt);
-    console.log("receiptBytes", rawReceipt);
     // eslint-disable-next-line no-await-in-loop
-
     await receiptsTrie.put(path, rawReceipt);
-    console.log("put a receipt");
   }
 
-  console.log("put receipts");
-
   const { node, remaining, stack } = await receiptsTrie.findPath(rlp.encode(receipt.transactionIndex));
-
-  console.log("got path");
 
   if (node === null || remaining.length > 0) {
     throw new Error("Node does not contain the key");
