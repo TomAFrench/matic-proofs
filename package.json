@@ -1,8 +1,9 @@
 {
-  "name": "pos-portal",
-  "version": "1.1.0",
-  "description": "Contracts to facilitate transfer of assets between main chain and matic chain using security of matic POS layer",
-  "main": "index.js",
+  "name": "matic-proof-generation",
+  "version": "0.1.0-alpha.0",
+  "description": "Package to generate the required proofs to exit funds from Matic Network",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "testrpc": "ganache-cli --hardfork istanbul --mnemonic 'clock radar mass judge dismiss just intact mind resemble fringe diary casino' --gasLimit 8000000 --gasPrice 0 --port 9545 --networkId 53227",
     "template:process": "node scripts/process-templates.js",
@@ -22,14 +23,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maticnetwork/pos-portal.git"
+    "url": "git+https://github.com/TomAFrench/matic-proof-generation.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/maticnetwork/pos-portal/issues"
+    "url": "https://github.com/TomAFrench/matic-proof-generation/issues"
   },
-  "homepage": "https://github.com/maticnetwork/pos-portal#readme",
+  "homepage": "https://github.com/TomAFrench/matic-proof-generation#readme",
   "config": {
     "mnemonics": "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
   },
