@@ -61,10 +61,10 @@ export const isBurnTxProcessed = async (
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
   const receiptProof = await getReceiptProof(maticChainProvider, burnTxReceipt, burnTxBlock);
 
-  // The first byte must be dropped from receiptProof.parentNodes
+  // The first byte must be dropped from receiptProof.path
   const exitHash = solidityKeccak256(
     ["uint256", "bytes", "uint256"],
-    [burnTxReceipt.blockNumber, bufferToHex(rlp.encode(receiptProof.parentNodes).slice(1)), logIndex],
+    [burnTxReceipt.blockNumber, bufferToHex(receiptProof.path.slice(1)), logIndex],
   );
   return rootChainContract.processedExits(exitHash);
 };
