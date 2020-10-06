@@ -60,7 +60,9 @@ export const isBurnTxProcessed = async (
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
   const receiptProof = await getReceiptProof(maticChainProvider, burnTxReceipt, burnTxBlock);
 
-  const exitHash = keccak256(Buffer.from([burnTxReceipt.blockNumber, receiptProof.parentNodes, logIndex]));
+  const exitHash = keccak256(
+    Buffer.from([burnTxReceipt.blockNumber, bufferToHex(rlp.encode(receiptProof.parentNodes)), logIndex]),
+  );
   return rootChainContract.processedExits(exitHash);
 };
 
