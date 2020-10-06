@@ -1,5 +1,5 @@
 {
-  "name": "matic-proof-generation",
+  "name": "@tomfrench/matic-proofs",
   "version": "0.1.0-alpha.0",
   "description": "Package to generate the required proofs to exit funds from Matic Network",
   "main": "lib/index.js",
@@ -23,14 +23,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TomAFrench/matic-proof-generation.git"
+    "url": "git+https://github.com/TomAFrench/matic-proofs.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/TomAFrench/matic-proof-generation/issues"
+    "url": "https://github.com/TomAFrench/matic-proofs/issues"
   },
-  "homepage": "https://github.com/TomAFrench/matic-proof-generation#readme",
+  "homepage": "https://github.com/TomAFrench/matic-proofs#readme",
   "config": {
     "mnemonics": "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
   },
