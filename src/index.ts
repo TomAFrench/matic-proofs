@@ -88,10 +88,12 @@ export const buildPayloadForExit = async (
 ): Promise<ExitProof> => {
   // Check that we can actually confirm that the burn transaction exists
   const burnTx = await maticChainProvider.getTransaction(burnTxHash);
-  if (typeof burnTx.blockNumber === "undefined") {
-    throw new Error("Could not find find blocknumber of burnTx");
+  if (typeof burnTx === null) {
+    throw new Error("Could not find transaction corresponding to burnTxHash");
+  } else if (typeof burnTx.blockNumber === "undefined") {
+    throw new Error("Could not find blocknumber of burnTx");
   } else if (typeof burnTx.blockHash === "undefined") {
-    throw new Error("Could not find find blockHash of burnTx");
+    throw new Error("Could not find blockHash of burnTx");
   }
 
   // Check that the block containing the burn transaction is checkpointed on mainnet.
