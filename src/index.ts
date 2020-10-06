@@ -1,8 +1,9 @@
 import { Contract } from "@ethersproject/contracts";
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { keccak256 as solidityKeccak256 } from "@ethersproject/solidity";
 
-import { bufferToHex, keccak256, rlp } from "ethereumjs-util";
+import { bufferToHex, rlp } from "ethereumjs-util";
 import checkpointManagerABI from "./abi/ICheckpointManager.json";
 import rootChainABI from "./abi/RootChainManager.json";
 
@@ -61,10 +62,9 @@ export const isBurnTxProcessed = async (
   const receiptProof = await getReceiptProof(maticChainProvider, burnTxReceipt, burnTxBlock);
 
   // The first byte must be dropped from receiptProof.parentNodes
-  const exitHash = bufferToHex(
-    keccak256(
-      Buffer.from([burnTxReceipt.blockNumber, bufferToHex(rlp.encode(receiptProof.parentNodes).slice(1)), logIndex]),
-    ),
+  const exitHash = solidityKeccak256(
+    ["uint256", "bytes", "uint256"],
+    [burnTxReceipt.blockNumber, bufferToHex(rlp.encode(receiptProof.parentNodes).slice(1)), logIndex],
   );
   return rootChainContract.processedExits(exitHash);
 };

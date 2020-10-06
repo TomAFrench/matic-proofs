@@ -74,6 +74,7 @@
     "@ethersproject/bignumber": "^5.0.7",
     "@ethersproject/contracts": "^5.0.4",
     "@ethersproject/providers": "^5.0.9",
+    "@ethersproject/solidity": "^5.0.5",
     "bn.js": "^5.1.1",
     "ethereumjs-block": "^2.2.2",
     "ethereumjs-util": "^7.0.5",
