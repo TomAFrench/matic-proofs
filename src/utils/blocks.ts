@@ -29,11 +29,11 @@ export const getFullBlockByNumber = (
 
 const BIG_ONE = BigNumber.from(1);
 const BIG_TWO = BigNumber.from(2);
-const CHECKPOINT_ID_INTERVAL = BigNumber.from(10000);
 
 export const findHeaderBlockNumber = async (
   checkpointManagerContract: Contract,
   childBlockNumber: BigNumberish,
+  checkpointIdInterval: BigNumberish = BigNumber.from(10000),
 ): Promise<BigNumber> => {
   // eslint-disable-next-line no-param-reassign
   childBlockNumber = BigNumber.from(childBlockNumber);
@@ -41,7 +41,7 @@ export const findHeaderBlockNumber = async (
   let start = BIG_ONE;
 
   // last checkpoint id = end * 10000
-  let end = BigNumber.from(await checkpointManagerContract.currentHeaderBlock()).div(CHECKPOINT_ID_INTERVAL);
+  let end = BigNumber.from(await checkpointManagerContract.currentHeaderBlock()).div(checkpointIdInterval);
   if (start.gt(end)) {
     throw new Error("start block is greater than end block");
   }
@@ -55,7 +55,7 @@ export const findHeaderBlockNumber = async (
     }
     const mid = start.add(end).div(BIG_TWO);
     // eslint-disable-next-line no-await-in-loop
-    const headerBlock = await checkpointManagerContract.headerBlocks(mid.mul(CHECKPOINT_ID_INTERVAL).toString());
+    const headerBlock = await checkpointManagerContract.headerBlocks(mid.mul(checkpointIdInterval).toString());
     const headerStart = BigNumber.from(headerBlock.start);
     const headerEnd = BigNumber.from(headerBlock.end);
 
@@ -71,5 +71,5 @@ export const findHeaderBlockNumber = async (
       start = mid.add(BIG_ONE);
     }
   }
-  return ans.mul(CHECKPOINT_ID_INTERVAL);
+  return ans.mul(checkpointIdInterval);
 };
