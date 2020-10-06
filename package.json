@@ -1,6 +1,6 @@
 {
   "name": "@tomfrench/matic-proofs",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "Package to generate the required proofs to exit funds from Matic Network",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
