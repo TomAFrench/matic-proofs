@@ -64,7 +64,7 @@ export const isBurnTxProcessed = async (
   return rootChainContract.processedExits(exitHash);
 };
 
-export const isBurnTxCheckPointed = async (
+export const isBurnTxCheckpointed = async (
   rootChainProvider: Provider,
   rootChainContractAddress: string,
   burnTxBlockNumber: BigNumberish,
@@ -94,7 +94,7 @@ export const buildPayloadForExit = async (
 
   // Check that the block containing the burn transaction is checkpointed on mainnet.
   const rootChainContract = new Contract(rootChainContractAddress, rootChainABI, rootChainProvider);
-  if (!isBurnTxCheckPointed(rootChainProvider, rootChainContractAddress, burnTx.blockNumber)) {
+  if (!isBurnTxCheckpointed(rootChainProvider, rootChainContractAddress, burnTx.blockNumber)) {
     throw new Error("Burn transaction has not been checkpointed as yet");
   }
 
