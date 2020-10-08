@@ -27,9 +27,6 @@ export const getFullBlockByNumber = (
     blockTag: toTrimmedHexString(blockNumber),
   });
 
-const BIG_ONE = BigNumber.from(1);
-const BIG_TWO = BigNumber.from(2);
-
 export const findHeaderBlockNumber = async (
   checkpointManagerContract: Contract,
   childBlockNumber: BigNumberish,
@@ -38,7 +35,7 @@ export const findHeaderBlockNumber = async (
   // eslint-disable-next-line no-param-reassign
   childBlockNumber = BigNumber.from(childBlockNumber);
   // first checkpoint id = start * 10000
-  let start = BIG_ONE;
+  let start = BigNumber.from(1);
 
   // last checkpoint id = end * 10000
   let end = BigNumber.from(await checkpointManagerContract.currentHeaderBlock()).div(checkpointIdInterval);
@@ -53,7 +50,7 @@ export const findHeaderBlockNumber = async (
       ans = start;
       break;
     }
-    const mid = start.add(end).div(BIG_TWO);
+    const mid = start.add(end).div(2);
     // eslint-disable-next-line no-await-in-loop
     const headerBlock = await checkpointManagerContract.headerBlocks(mid.mul(checkpointIdInterval).toString());
     const headerStart = BigNumber.from(headerBlock.start);
@@ -65,10 +62,10 @@ export const findHeaderBlockNumber = async (
       break;
     } else if (headerStart.gt(childBlockNumber)) {
       // childBlockNumber was checkpointed before this header
-      end = mid.sub(BIG_ONE);
+      end = mid.sub(1);
     } else if (headerEnd.lt(childBlockNumber)) {
       // childBlockNumber was checkpointed after this header
-      start = mid.add(BIG_ONE);
+      start = mid.add(1);
     }
   }
   return ans.mul(checkpointIdInterval);
