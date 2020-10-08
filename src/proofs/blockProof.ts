@@ -16,11 +16,13 @@ const getBlockHeader = (block: RequiredBlockMembers): Buffer => {
 };
 
 const buildBlockHeaderMerkle = async (maticChainProvider: JsonRpcProvider, start: number, end: number) => {
-  const headers = await Promise.all(
+  const blocks = await Promise.all(
     Array.from({ length: end - start + 1 }, async (_, index: number) =>
-      getBlockHeader(await getFullBlockByNumber(maticChainProvider, start + index)),
+      getFullBlockByNumber(maticChainProvider, start + index),
     ),
   );
+
+  const headers = blocks.map(block => getBlockHeader(block));
   return new MerkleTree(headers);
 };
 
