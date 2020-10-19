@@ -1,11 +1,13 @@
-import { JsonRpcProvider } from "@ethersproject/providers";
+import { JsonRpcProvider, Provider } from "@ethersproject/providers";
 import BN from "bn.js";
 import { map } from "bluebird";
 import { toBuffer, keccak256 } from "ethereumjs-util";
-import { BigNumber } from "@ethersproject/bignumber";
+import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import MerkleTree from "../utils/merkleTree";
 import { getFullBlockByNumber } from "../utils/blocks";
-import { RequiredBlockMembers } from "../types";
+import { BlockProof, RequiredBlockMembers } from "../types";
+import { findBlockCheckpoint } from "../utils/checkpoint";
+import { isBlockCheckpointed } from "../checks";
 
 const getBlockHeader = (block: RequiredBlockMembers): Buffer => {
   const n = new BN(BigNumber.from(block.number).toString()).toArrayLike(Buffer, "be", 32);
@@ -29,7 +31,7 @@ const buildBlockHeaderMerkle = async (maticChainProvider: JsonRpcProvider, start
   return new MerkleTree(headers);
 };
 
-export const buildBlockProof = async (
+const blockHeaderMerkleProof = async (
   maticChainProvider: JsonRpcProvider,
   start: number,
   end: number,
@@ -40,4 +42,42 @@ export const buildBlockProof = async (
   const blockHeader = getBlockHeader(burnTxBlock);
   const proof = tree.getProof(blockHeader);
   return proof;
+};
+
+export const buildBlockProof = async (
+  rootChainProvider: Provider,
+  maticChainProvider: JsonRpcProvider,
+  rootChainContractAddress: string,
+  blockNumber: BigNumberish,
+): Promise<BlockProof> => {
+  // Check that the block containing is checkpointed on mainnet.
+  if (!isBlockCheckpointed(rootChainProvider, rootChainContractAddress, blockNumber)) {
+    throw new Error("Block has not been checkpointed yet");
+  }
+
+  const [checkpointId, checkpoint] = await findBlockCheckpoint(
+    rootChainProvider,
+    rootChainContractAddress,
+    blockNumber,
+  );
+
+  // Build proof that block containing burnTx is included in Matic chain.
+  // Proves that a block with the stated blocknumber has been included in a checkpoint
+  const blockProof = await blockHeaderMerkleProof(
+    maticChainProvider,
+    BigNumber.from(checkpoint.start).toNumber(),
+    BigNumber.from(checkpoint.end).toNumber(),
+    BigNumber.from(blockNumber).toNumber(),
+  );
+
+  const block = await getFullBlockByNumber(maticChainProvider, blockNumber);
+
+  return {
+    burnTxBlockNumber: BigNumber.from(blockNumber).toNumber(),
+    burnTxBlockTimestamp: BigNumber.from(block.timestamp).toNumber(),
+    transactionsRoot: Buffer.from(block.transactionsRoot.slice(2), "hex"),
+    receiptsRoot: Buffer.from(block.receiptsRoot.slice(2), "hex"),
+    headerBlockNumber: checkpointId.toNumber(),
+    blockProof,
+  };
 };

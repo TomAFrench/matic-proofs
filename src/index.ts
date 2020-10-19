@@ -1,18 +1,15 @@
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
-import { BigNumber } from "@ethersproject/bignumber";
 
 import { bufferToHex, rlp } from "ethereumjs-util";
 
-import { ExitProof, RequiredBlockMembers } from "./types";
+import { ExitProof } from "./types";
 import { buildBlockProof } from "./proofs/blockProof";
-import { getReceiptBytes, getReceiptProof } from "./proofs/receiptProof";
-import { getFullBlockByHash } from "./utils/blocks";
-import { findBlockCheckpoint } from "./utils/checkpoint";
+import { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
 import { getLogIndex } from "./utils/logIndex";
-import { isBlockCheckpointed } from "./checks";
 
+export { buildBlockProof } from "./proofs/blockProof";
+export { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
 export { isBlockCheckpointed, isBurnTxCheckpointed, isBurnTxProcessed, isBurnTxClaimable } from "./checks";
-export { getReceiptProof } from "./proofs/receiptProof";
 
 export const ERC20_TRANSFER_EVENT_SIG = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 export const ERC721_TRANSFER_EVENT_SIG = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
@@ -63,41 +60,30 @@ export const buildPayloadForExit = async (
     throw new Error("Could not find blockHash of burnTx");
   }
 
-  // Check that the block containing the burn transaction is checkpointed on mainnet.
-  if (!isBlockCheckpointed(rootChainProvider, rootChainContractAddress, burnTx.blockNumber)) {
-    throw new Error("Burn transaction has not been checkpointed yet");
-  }
-
-  const [checkpointId, checkpoint] = await findBlockCheckpoint(
-    rootChainProvider,
-    rootChainContractAddress,
-    burnTx.blockNumber,
-  );
-
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
-  const blockProof = await buildBlockProof(
-    maticChainProvider,
-    BigNumber.from(checkpoint.start).toNumber(),
-    BigNumber.from(checkpoint.end).toNumber(),
-    burnTx.blockNumber,
-  );
+  const {
+    burnTxBlockNumber,
+    burnTxBlockTimestamp,
+    transactionsRoot,
+    receiptsRoot,
+    headerBlockNumber,
+    blockProof,
+  } = await buildBlockProof(rootChainProvider, maticChainProvider, rootChainContractAddress, burnTx.blockNumber);
 
   // Build proof that the burn transaction is included in this block.
-  const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTx.blockHash);
-  const receipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
+  const { receipt, receiptProof } = await buildReceiptProof(maticChainProvider, burnTxHash);
 
+  // Finds the index of the first burn transaction within the receipt.
   const logIndex = getLogIndex(receipt, logEventSig);
 
-  const receiptProof = await getReceiptProof(maticChainProvider, receipt, burnTxBlock);
-
   return {
-    headerBlockNumber: checkpointId.toNumber(),
+    headerBlockNumber,
     blockProof,
-    burnTxBlockNumber: BigNumber.from(burnTx.blockNumber).toNumber(),
-    burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),
-    transactionsRoot: Buffer.from(burnTxBlock.transactionsRoot.slice(2), "hex"),
-    receiptsRoot: Buffer.from(burnTxBlock.receiptsRoot.slice(2), "hex"),
+    burnTxBlockNumber,
+    burnTxBlockTimestamp,
+    transactionsRoot,
+    receiptsRoot,
     receipt: getReceiptBytes(receipt), // rlp encoded
     receiptProofParentNodes: receiptProof.parentNodes,
     receiptProofPath: receiptProof.path,

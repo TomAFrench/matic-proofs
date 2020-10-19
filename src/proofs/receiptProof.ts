@@ -1,9 +1,10 @@
-import { Provider, TransactionReceipt } from "@ethersproject/providers";
+import { JsonRpcProvider, Provider, TransactionReceipt } from "@ethersproject/providers";
 import { BaseTrie } from "merkle-patricia-tree";
 import { rlp, toBuffer } from "ethereumjs-util";
 import blockHeaderFromRpc from "ethereumjs-block/header-from-rpc";
 import { BigNumber } from "@ethersproject/bignumber";
-import { ReceiptProof, RequiredBlockMembers } from "../types";
+import { ReceiptMPProof, ReceiptProof, RequiredBlockMembers } from "../types";
+import { getFullBlockByHash } from "../utils/blocks";
 
 export const getReceiptBytes = (receipt: TransactionReceipt): Buffer => {
   return rlp.encode([
@@ -26,18 +27,9 @@ export const getReceiptBytes = (receipt: TransactionReceipt): Buffer => {
   ]);
 };
 
-export const getReceiptProof = async (
-  provider: Provider,
-  receipt: TransactionReceipt,
-  block: RequiredBlockMembers,
-  receipts: TransactionReceipt[] = [],
-): Promise<ReceiptProof> => {
+const buildReceiptTrie = async (provider: Provider, block: RequiredBlockMembers) => {
+  const receipts = await Promise.all(block.transactions.map(tx => provider.getTransactionReceipt(tx)));
   const receiptsTrie = new BaseTrie();
-  if (!receipts || receipts.length === 0) {
-    // eslint-disable-next-line no-param-reassign
-    receipts = await Promise.all(block.transactions.map(tx => provider.getTransactionReceipt(tx)));
-  }
-
   // Add all receipts to the trie
   for (let i = 0; i < receipts.length; i += 1) {
     const siblingReceipt = receipts[i];
@@ -46,7 +38,15 @@ export const getReceiptProof = async (
     // eslint-disable-next-line no-await-in-loop
     await receiptsTrie.put(path, rawReceipt);
   }
+  return receiptsTrie;
+};
 
+export const receiptMerklePatriciaProof = async (
+  provider: Provider,
+  receipt: TransactionReceipt,
+  block: RequiredBlockMembers,
+): Promise<ReceiptMPProof> => {
+  const receiptsTrie = await buildReceiptTrie(provider, block);
   const { node, remaining, stack } = await receiptsTrie.findPath(rlp.encode(receipt.transactionIndex));
 
   if (node === null || remaining.length > 0) {
@@ -59,5 +59,21 @@ export const getReceiptProof = async (
     root: blockHeaderFromRpc(block).receiptTrie,
     path: Buffer.concat([Buffer.from("00", "hex"), rlp.encode(receipt.transactionIndex)]),
     value: rlp.decode(node.value),
+  };
+};
+
+export const buildReceiptProof = async (
+  maticChainProvider: JsonRpcProvider,
+  burnTxHash: string,
+): Promise<ReceiptProof> => {
+  const receipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
+  const burnTxBlock = await getFullBlockByHash(maticChainProvider, receipt.blockHash);
+  // Build proof that the burn transaction is included in this block.
+  const receiptProof = await receiptMerklePatriciaProof(maticChainProvider, receipt, burnTxBlock);
+
+  return {
+    receipt,
+    receiptProof,
+    receiptsRoot: Buffer.from(burnTxBlock.receiptsRoot.slice(2), "hex"),
   };
 };

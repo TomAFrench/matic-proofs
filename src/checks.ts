@@ -6,7 +6,7 @@ import { bufferToHex } from "ethereumjs-util";
 
 import checkpointManagerABI from "./abi/ICheckpointManager.json";
 import rootChainABI from "./abi/RootChainManager.json";
-import { getReceiptProof } from "./proofs/receiptProof";
+import { receiptMerklePatriciaProof } from "./proofs/receiptProof";
 import { getFullBlockByHash } from "./utils/blocks";
 import { getLogIndex } from "./utils/logIndex";
 import { RequiredBlockMembers } from "./types";
@@ -28,7 +28,7 @@ export const isBurnTxProcessed = async (
   const logIndex = getLogIndex(burnTxReceipt, logEventSig);
 
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
-  const { path } = await getReceiptProof(maticChainProvider, burnTxReceipt, burnTxBlock);
+  const { path } = await receiptMerklePatriciaProof(maticChainProvider, burnTxReceipt, burnTxBlock);
 
   const nibbleArr: Buffer[] = [];
   path.forEach(byte => {

@@ -1,4 +1,5 @@
 import { BigNumberish } from "@ethersproject/bignumber";
+import { TransactionReceipt } from "@ethersproject/providers";
 import { rlp } from "ethereumjs-util";
 
 export interface RequiredBlockMembers {
@@ -18,12 +19,27 @@ export type HeaderBlockCheckpoint = {
   proposer: string;
 };
 
-export type ReceiptProof = {
+export type ReceiptMPProof = {
   blockHash: Buffer;
   parentNodes: Buffer[];
   root: Buffer;
   path: Buffer;
   value: Buffer | Buffer[] | rlp.Decoded;
+};
+
+export interface BlockProof {
+  burnTxBlockNumber: number;
+  burnTxBlockTimestamp: number;
+  transactionsRoot: Buffer;
+  receiptsRoot: Buffer;
+  headerBlockNumber: number;
+  blockProof: Buffer[];
+}
+
+export type ReceiptProof = {
+  receipt: TransactionReceipt;
+  receiptProof: ReceiptMPProof;
+  receiptsRoot: Buffer;
 };
 
 export interface ExitProof {
