@@ -72,6 +72,7 @@
   },
   "dependencies": {
     "@ethersproject/bignumber": "^5.0.7",
+    "@ethersproject/constants": "^5.0.5",
     "@ethersproject/contracts": "^5.0.4",
     "@ethersproject/providers": "^5.0.9",
     "@ethersproject/solidity": "^5.0.5",

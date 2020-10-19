@@ -234,6 +234,13 @@
   dependencies:
     "@ethersproject/bignumber" "^5.0.7"
 
+"@ethersproject/constants@^5.0.5":
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@ethersproject/constants/-/constants-5.0.5.tgz#0ed19b002e8404bdf6d135234dc86a7d9bcf9b71"
+  integrity sha512-foaQVmxp2+ik9FrLUCtVrLZCj4M3Ibgkqvh+Xw/vFRSerkjVSYePApaVE5essxhoSlF1U9oXfWY09QI2AXtgKA==
+  dependencies:
+    "@ethersproject/bignumber" "^5.0.7"
+
 "@ethersproject/contracts@^5.0.4":
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/@ethersproject/contracts/-/contracts-5.0.4.tgz#27a2d7e3a7eef9bd8d006824ac2a74157b523988"
