@@ -10,7 +10,8 @@ import rootChainABI from "./abi/RootChainManager.json";
 import { ExitProof, RequiredBlockMembers } from "./types";
 import { buildBlockProof } from "./proofs/blockProof";
 import { getReceiptBytes, getReceiptProof } from "./proofs/receiptProof";
-import { findHeaderBlockNumber, getFullBlockByHash } from "./utils/blocks";
+import { getFullBlockByHash } from "./utils/blocks";
+import { findBlockCheckpoint } from "./utils/checkpoint";
 import { getLogIndex } from "./utils/logIndex";
 
 export { getReceiptProof } from "./proofs/receiptProof";
@@ -106,23 +107,22 @@ export const buildPayloadForExit = async (
   }
 
   // Check that the block containing the burn transaction is checkpointed on mainnet.
-  const rootChainContract = new Contract(rootChainContractAddress, rootChainABI, rootChainProvider);
   if (!isBurnTxCheckpointed(rootChainProvider, rootChainContractAddress, burnTx.blockNumber)) {
     throw new Error("Burn transaction has not been checkpointed as yet");
   }
 
-  const checkpointManagerAddress = await rootChainContract.checkpointManagerAddress();
-  const checkpointManagerContract = new Contract(checkpointManagerAddress, checkpointManagerABI, rootChainProvider);
+  const [checkpointId, checkpoint] = await findBlockCheckpoint(
+    rootChainProvider,
+    rootChainContractAddress,
+    burnTx.blockNumber,
+  );
 
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
-  const headerBlockNumber = await findHeaderBlockNumber(checkpointManagerContract, burnTx.blockNumber);
-  const headerBlock = await checkpointManagerContract.headerBlocks(headerBlockNumber.toString());
-
   const blockProof = await buildBlockProof(
     maticChainProvider,
-    BigNumber.from(headerBlock.start).toNumber(),
-    BigNumber.from(headerBlock.end).toNumber(),
+    BigNumber.from(checkpoint.start).toNumber(),
+    BigNumber.from(checkpoint.end).toNumber(),
     burnTx.blockNumber,
   );
 
@@ -135,7 +135,7 @@ export const buildPayloadForExit = async (
   const receiptProof = await getReceiptProof(maticChainProvider, receipt, burnTxBlock);
 
   return {
-    headerBlockNumber: headerBlockNumber.toNumber(),
+    headerBlockNumber: checkpointId.toNumber(),
     blockProof,
     burnTxBlockNumber: BigNumber.from(burnTx.blockNumber).toNumber(),
     burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),

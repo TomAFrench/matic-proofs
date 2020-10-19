@@ -1,3 +1,4 @@
+import { BigNumberish } from "@ethersproject/bignumber";
 import { rlp } from "ethereumjs-util";
 
 export interface RequiredBlockMembers {
@@ -8,6 +9,14 @@ export interface RequiredBlockMembers {
   transactions: string[];
   transactionsRoot: string;
 }
+
+export type HeaderBlockCheckpoint = {
+  root: string;
+  start: BigNumberish;
+  end: BigNumberish;
+  createdAt: BigNumberish;
+  proposer: string;
+};
 
 export type ReceiptProof = {
   blockHash: Buffer;
