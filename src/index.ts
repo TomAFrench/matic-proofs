@@ -59,12 +59,18 @@ export const isBurnTxProcessed = async (
   const logIndex = getLogIndex(burnTxReceipt, logEventSig);
 
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
-  const receiptProof = await getReceiptProof(maticChainProvider, burnTxReceipt, burnTxBlock);
+  const { path } = await getReceiptProof(maticChainProvider, burnTxReceipt, burnTxBlock);
+
+  const nibbleArr: Buffer[] = [];
+  path.forEach(byte => {
+    nibbleArr.push(Buffer.from("0" + (byte / 0x10).toString(16), "hex"));
+    nibbleArr.push(Buffer.from("0" + (byte % 0x10).toString(16), "hex"));
+  });
 
   // The first byte must be dropped from receiptProof.path
   const exitHash = solidityKeccak256(
     ["uint256", "bytes", "uint256"],
-    [burnTxReceipt.blockNumber, bufferToHex(receiptProof.path.slice(1)), logIndex],
+    [burnTxReceipt.blockNumber, bufferToHex(Buffer.concat(nibbleArr)), logIndex],
   );
   return rootChainContract.processedExits(exitHash);
 };
