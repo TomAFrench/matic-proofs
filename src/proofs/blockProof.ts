@@ -23,7 +23,7 @@ const buildBlockHeaderMerkle = async (maticChainProvider: JsonRpcProvider, start
     async (_, index: number) => {
       headers[index] = getBlockHeader(await getFullBlockByNumber(maticChainProvider, start + index));
     },
-    { concurrency: 20 },
+    { concurrency: 10 },
   );
 
   // const blocks = await Promise.all(
