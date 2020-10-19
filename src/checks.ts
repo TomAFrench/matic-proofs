@@ -18,14 +18,10 @@ export const isBurnTxProcessed = async (
   burnTxHash: string,
   logEventSig: string,
 ): Promise<boolean> => {
-  const rootChainContract = new Contract(rootChainContractAddress, rootChainABI, rootChainProvider);
-
   const burnTxReceipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
   if (typeof burnTxReceipt.blockNumber === "undefined") {
     throw new Error("Could not find find blocknumber of burn transaction");
   }
-
-  const logIndex = getLogIndex(burnTxReceipt, logEventSig);
 
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
   const { path } = await receiptMerklePatriciaProof(maticChainProvider, burnTxReceipt, burnTxBlock);
@@ -36,11 +32,13 @@ export const isBurnTxProcessed = async (
     nibbleArr.push(Buffer.from("0" + (byte % 0x10).toString(16), "hex"));
   });
 
-  // The first byte must be dropped from receiptProof.path
+  const logIndex = getLogIndex(burnTxReceipt, logEventSig);
   const exitHash = solidityKeccak256(
     ["uint256", "bytes", "uint256"],
     [burnTxReceipt.blockNumber, bufferToHex(Buffer.concat(nibbleArr)), logIndex],
   );
+
+  const rootChainContract = new Contract(rootChainContractAddress, rootChainABI, rootChainProvider);
   return rootChainContract.processedExits(exitHash);
 };
 
