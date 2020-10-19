@@ -26,12 +26,6 @@ const buildBlockHeaderMerkle = async (maticChainProvider: JsonRpcProvider, start
     { concurrency: 10 },
   );
 
-  // const blocks = await Promise.all(
-  //   Array.from({ length: end - start + 1 }, async (_, index: number) =>
-  //     getFullBlockByNumber(maticChainProvider, start + index),
-  //   ),
-  // );
-  // const headers = blocks.map(block => getBlockHeader(block));
   return new MerkleTree(headers);
 };
 
