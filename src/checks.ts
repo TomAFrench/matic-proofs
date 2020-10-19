@@ -26,16 +26,18 @@ export const isBurnTxProcessed = async (
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
   const { path } = await receiptMerklePatriciaProof(maticChainProvider, burnTxReceipt, burnTxBlock);
 
-  const nibbleArr: Buffer[] = [];
-  path.forEach(byte => {
-    nibbleArr.push(Buffer.from("0" + (byte / 0x10).toString(16), "hex"));
-    nibbleArr.push(Buffer.from("0" + (byte % 0x10).toString(16), "hex"));
+  const nibbleArray: Buffer[] = [];
+  // RootChain.sol drops first byte (2 nibbles) from nibble array when calculating nibbleArray
+  path.slice(1).forEach(byte => {
+    nibbleArray.push(Buffer.from("0" + (byte / 0x10).toString(16), "hex"));
+    nibbleArray.push(Buffer.from("0" + (byte % 0x10).toString(16), "hex"));
   });
+  const nibblesHex = bufferToHex(Buffer.concat(nibbleArray));
 
   const logIndex = getLogIndex(burnTxReceipt, logEventSig);
   const exitHash = solidityKeccak256(
     ["uint256", "bytes", "uint256"],
-    [burnTxReceipt.blockNumber, bufferToHex(Buffer.concat(nibbleArr)), logIndex],
+    [burnTxReceipt.blockNumber, nibblesHex, logIndex],
   );
 
   const rootChainContract = new Contract(rootChainContractAddress, rootChainABI, rootChainProvider);
