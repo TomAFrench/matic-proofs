@@ -9,13 +9,11 @@ import { getLogIndex } from "./utils/logIndex";
 import { RequiredBlockMembers } from "./types";
 import { getCheckpointManager, getRootChainManager } from "./utils/contracts";
 
-export const isBurnTxProcessed = async (
-  rootChainProvider: Provider,
+const calculateExitHash = async (
   maticChainProvider: JsonRpcProvider,
-  rootChainContractAddress: string,
   burnTxHash: string,
   logEventSig: string,
-): Promise<boolean> => {
+): Promise<string> => {
   const burnTxReceipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
   if (typeof burnTxReceipt.blockNumber === "undefined") {
     throw new Error("Could not find find blocknumber of burn transaction");
@@ -38,6 +36,17 @@ export const isBurnTxProcessed = async (
     [burnTxReceipt.blockNumber, nibblesHex, logIndex],
   );
 
+  return exitHash;
+};
+
+export const isBurnTxProcessed = async (
+  rootChainProvider: Provider,
+  maticChainProvider: JsonRpcProvider,
+  rootChainContractAddress: string,
+  burnTxHash: string,
+  logEventSig: string,
+): Promise<boolean> => {
+  const exitHash = await calculateExitHash(maticChainProvider, burnTxHash, logEventSig);
   const rootChainContract = getRootChainManager(rootChainProvider, rootChainContractAddress);
   return rootChainContract.processedExits(exitHash);
 };
