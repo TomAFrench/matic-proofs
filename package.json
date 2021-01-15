@@ -5,21 +5,9 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "testrpc": "ganache-cli --hardfork istanbul --mnemonic 'clock radar mass judge dismiss just intact mind resemble fringe diary casino' --gasLimit 8000000 --gasPrice 0 --port 9545 --networkId 53227",
-    "template:process": "node scripts/process-templates.js",
-    "bor": "cd test-blockchain && bash run-docker.sh",
-    "bor:clean": "cd test-blockchain && bash stop-docker.sh",
     "clean": "shx rm -rf ./lib",
-    "truffle": "truffle",
-    "build": "yarn clean && tsc",
-    "compile": "truffle compile",
-    "test": "truffle test",
-    "lint": "npm run lint:sol && npm run lint:js",
-    "lint:js": "eslint src/**/*.ts test/**/*.js",
-    "lint:sol:fix": "solium -d contracts/ --fix",
-    "lint:sol": "solium -d contracts/",
-    "debug": "truffle debug",
-    "test:ci": "scripts/run-test.sh"
+    "build": "yarn clean && tsc -p tsconfig.production.json",
+    "lint": "eslint src/**/*.ts test/**/*.js"
   },
   "repository": {
     "type": "git",
