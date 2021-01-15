@@ -1,15 +1,13 @@
-import { Contract } from "@ethersproject/contracts";
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { keccak256 as solidityKeccak256 } from "@ethersproject/solidity";
 import { bufferToHex } from "ethereumjs-util";
 
-import checkpointManagerABI from "./abi/ICheckpointManager.json";
-import rootChainABI from "./abi/RootChainManager.json";
 import { receiptMerklePatriciaProof } from "./proofs/receiptProof";
 import { getFullBlockByHash } from "./utils/blocks";
 import { getLogIndex } from "./utils/logIndex";
 import { RequiredBlockMembers } from "./types";
+import { getCheckpointManager, getRootChainManager } from "./utils/contracts";
 
 export const isBurnTxProcessed = async (
   rootChainProvider: Provider,
@@ -40,7 +38,7 @@ export const isBurnTxProcessed = async (
     [burnTxReceipt.blockNumber, nibblesHex, logIndex],
   );
 
-  const rootChainContract = new Contract(rootChainContractAddress, rootChainABI, rootChainProvider);
+  const rootChainContract = getRootChainManager(rootChainProvider, rootChainContractAddress);
   return rootChainContract.processedExits(exitHash);
 };
 
@@ -49,9 +47,7 @@ export const isBlockCheckpointed = async (
   rootChainContractAddress: string,
   blockNumber: BigNumberish,
 ): Promise<boolean> => {
-  const rootChainContract = new Contract(rootChainContractAddress, rootChainABI, rootChainProvider);
-  const checkpointManagerAddress = await rootChainContract.checkpointManagerAddress();
-  const checkpointManagerContract = new Contract(checkpointManagerAddress, checkpointManagerABI, rootChainProvider);
+  const checkpointManagerContract = await getCheckpointManager(rootChainProvider, rootChainContractAddress);
   const lastChildBlock = await checkpointManagerContract.getLastChildBlock();
 
   return BigNumber.from(lastChildBlock).gte(blockNumber);

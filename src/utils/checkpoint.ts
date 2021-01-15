@@ -1,10 +1,8 @@
 import { Contract } from "@ethersproject/contracts";
 import { Provider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-
-import checkpointManagerABI from "../abi/ICheckpointManager.json";
-import rootChainABI from "../abi/RootChainManager.json";
 import { HeaderBlockCheckpoint } from "../types";
+import { getCheckpointManager } from "./contracts";
 
 export const findHeaderBlockNumber = async (
   checkpointManagerContract: Contract,
@@ -62,10 +60,7 @@ export const findBlockCheckpoint = async (
   rootChainContractAddress: string,
   blockNumber: BigNumberish,
 ): Promise<[BigNumber, HeaderBlockCheckpoint]> => {
-  const rootChainContract = new Contract(rootChainContractAddress, rootChainABI, rootChainProvider);
-  const checkpointManagerAddress = await rootChainContract.checkpointManagerAddress();
-  const checkpointManagerContract = new Contract(checkpointManagerAddress, checkpointManagerABI, rootChainProvider);
-
+  const checkpointManagerContract = await getCheckpointManager(rootChainProvider, rootChainContractAddress);
   const headerBlockNumber = await findHeaderBlockNumber(checkpointManagerContract, blockNumber);
   const headerBlock = await checkpointManagerContract.headerBlocks(headerBlockNumber.toString());
   return [headerBlockNumber, headerBlock];
