@@ -9,15 +9,3 @@ build
 # flat
 
 lib/
-
-contracts/ChainConstants.sol
-
-test-blockchain/genesis.json
-test-blockchain/geth
-test-blockchain/history
-test-blockchain/data
-test-blockchain/start.sh
-
-contractAddresses.json
-
-tenderly.yaml

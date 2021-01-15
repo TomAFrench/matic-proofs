@@ -1,15 +1,7 @@
 #folders
-.github
-build
-contracts
-migrations
 src
-scripts
-test
-test-blockchain
 
 #files
-.babelrc
 .commitlintrc.js
 .editorconfig
 .eslintignore
@@ -19,11 +11,8 @@ test-blockchain
 .lintstagedrc.js
 .nvmrc
 .prettierrc
-.soliumignore
-.soliumrc.json
-contractAddresses.json
-truffle-config.js
 tsconfig.json
+tsconfig.production.json
 yarn.lock
 
 *.log
