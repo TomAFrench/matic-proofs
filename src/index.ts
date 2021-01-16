@@ -48,7 +48,7 @@ export const buildPayloadForExit = async (
   maticChainProvider: JsonRpcProvider,
   rootChainContractAddress: string,
   burnTxHash: string,
-  logEventSig: string,
+  logEventSigOrIndex: string | number,
 ): Promise<ExitProof> => {
   // Check that we can actually confirm that the burn transaction exists
   const burnTx = await maticChainProvider.getTransaction(burnTxHash);
@@ -74,8 +74,11 @@ export const buildPayloadForExit = async (
   // Build proof that the burn transaction is included in this block.
   const { receipt, receiptProof } = await buildReceiptProof(maticChainProvider, burnTxHash);
 
-  // Finds the index of the first burn transaction within the receipt.
-  const logIndex = getLogIndex(receipt, logEventSig);
+  // If user has provided a string, find index of the first matching withdraw event in the receipt.
+  // If user has provided a number, take this as the index of the desired withdrawal event.
+  // This is necessary as a transaction can have multiple withdrawals.
+  const logIndex =
+    typeof logEventSigOrIndex === "string" ? getLogIndex(receipt, logEventSigOrIndex) : logEventSigOrIndex;
 
   return {
     headerBlockNumber,
