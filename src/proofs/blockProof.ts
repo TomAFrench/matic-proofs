@@ -34,20 +34,6 @@ const getMerkleTreeBlocks = async (
   return blocks;
 };
 
-const blockHeaderMerkleProof = async (
-  maticChainProvider: JsonRpcProvider,
-  start: number,
-  end: number,
-  blockNumber: number,
-): Promise<Buffer[]> => {
-  const blocks = await getMerkleTreeBlocks(maticChainProvider, start, end);
-  const tree = new MerkleTree(blocks.map(getBlockHeader));
-  const burnTxBlock = blocks.find(block => BigNumber.from(block.number).eq(blockNumber));
-  const blockHeader = getBlockHeader(burnTxBlock as RequiredBlockMembers);
-  const proof = tree.getProof(blockHeader);
-  return proof;
-};
-
 export const buildBlockProof = async (
   rootChainProvider: Provider,
   maticChainProvider: JsonRpcProvider,
@@ -65,22 +51,20 @@ export const buildBlockProof = async (
     blockNumber,
   );
 
+  const startBlock = BigNumber.from(checkpoint.start).toNumber();
+  const endBlock = BigNumber.from(checkpoint.start).toNumber();
+
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
-  const blockProof = await blockHeaderMerkleProof(
-    maticChainProvider,
-    BigNumber.from(checkpoint.start).toNumber(),
-    BigNumber.from(checkpoint.end).toNumber(),
-    BigNumber.from(blockNumber).toNumber(),
-  );
-
-  const block = await getFullBlockByNumber(maticChainProvider, blockNumber);
+  const blocks = await getMerkleTreeBlocks(maticChainProvider, startBlock, endBlock);
+  const burnTxBlock = blocks[BigNumber.from(blockNumber).sub(startBlock).toNumber()];
+  const blockProof = new MerkleTree(blocks.map(getBlockHeader)).getProof(getBlockHeader(burnTxBlock));
 
   return {
     burnTxBlockNumber: BigNumber.from(blockNumber).toNumber(),
-    burnTxBlockTimestamp: BigNumber.from(block.timestamp).toNumber(),
-    transactionsRoot: Buffer.from(block.transactionsRoot.slice(2), "hex"),
-    receiptsRoot: Buffer.from(block.receiptsRoot.slice(2), "hex"),
+    burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),
+    transactionsRoot: Buffer.from(burnTxBlock.transactionsRoot.slice(2), "hex"),
+    receiptsRoot: Buffer.from(burnTxBlock.receiptsRoot.slice(2), "hex"),
     headerBlockNumber: checkpointId.toNumber(),
     blockProof,
   };
