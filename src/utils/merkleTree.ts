@@ -1,13 +1,13 @@
 import { keccak256, zeros } from "ethereumjs-util";
 
-export default class MerkleTree {
-  leaves: any;
+class MerkleTree {
+  private leaves: Buffer[];
 
-  layers: any;
+  private layers: Buffer[][];
 
   constructor(leaves: Buffer[] = []) {
     if (leaves.length < 1) {
-      throw new Error("Atleast 1 leaf needed");
+      throw new Error("At least 1 leaf needed");
     }
 
     const depth = Math.ceil(Math.log(leaves.length) / Math.log(2));
@@ -20,7 +20,7 @@ export default class MerkleTree {
     this.createHashes(this.leaves);
   }
 
-  createHashes(nodes: Buffer[]): boolean {
+  private createHashes(nodes: Buffer[]): boolean {
     if (nodes.length === 1) {
       // Reached the top of the tree
       return true;
@@ -43,15 +43,15 @@ export default class MerkleTree {
     return this.createHashes(treeLevel);
   }
 
-  getLeaves() {
+  getLeaves(): Buffer[] {
     return this.leaves;
   }
 
-  getLayers() {
+  getLayers(): Buffer[][] {
     return this.layers;
   }
 
-  getRoot() {
+  getRoot(): Buffer {
     return this.layers[this.layers.length - 1][0];
   }
 
@@ -104,3 +104,5 @@ export default class MerkleTree {
     return Buffer.compare(hash, root) === 0;
   }
 }
+
+export default MerkleTree;
