@@ -17,18 +17,21 @@ const getBlockHeader = (block: RequiredBlockMembers): Buffer => {
   return keccak256(Buffer.concat([n, ts, txRoot, receiptsRoot]));
 };
 
-const buildBlockHeaderMerkle = async (maticChainProvider: JsonRpcProvider, start: number, end: number) => {
-  const headers = new Array(end - start + 1);
+const getMerkleTreeBlocks = async (
+  maticChainProvider: JsonRpcProvider,
+  start: number,
+  end: number,
+): Promise<RequiredBlockMembers[]> => {
+  const blocks = new Array(end - start + 1);
   await map(
-    headers,
-    // eslint-disable-next-line
+    blocks,
     async (_, index: number) => {
-      headers[index] = getBlockHeader(await getFullBlockByNumber(maticChainProvider, start + index));
+      blocks[index] = await getFullBlockByNumber(maticChainProvider, start + index);
     },
     { concurrency: 10 },
   );
 
-  return new MerkleTree(headers);
+  return blocks;
 };
 
 const blockHeaderMerkleProof = async (
@@ -37,7 +40,8 @@ const blockHeaderMerkleProof = async (
   end: number,
   blockNumber: number,
 ): Promise<Buffer[]> => {
-  const tree = await buildBlockHeaderMerkle(maticChainProvider, start, end);
+  const blocks = await getMerkleTreeBlocks(maticChainProvider, start, end);
+  const tree = new MerkleTree(blocks.map(getBlockHeader));
   const burnTxBlock = await getFullBlockByNumber(maticChainProvider, blockNumber);
   const blockHeader = getBlockHeader(burnTxBlock);
   const proof = tree.getProof(blockHeader);
