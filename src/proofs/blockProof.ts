@@ -42,8 +42,8 @@ const blockHeaderMerkleProof = async (
 ): Promise<Buffer[]> => {
   const blocks = await getMerkleTreeBlocks(maticChainProvider, start, end);
   const tree = new MerkleTree(blocks.map(getBlockHeader));
-  const burnTxBlock = await getFullBlockByNumber(maticChainProvider, blockNumber);
-  const blockHeader = getBlockHeader(burnTxBlock);
+  const burnTxBlock = blocks.find(block => BigNumber.from(block.number).eq(blockNumber));
+  const blockHeader = getBlockHeader(burnTxBlock as RequiredBlockMembers);
   const proof = tree.getProof(blockHeader);
   return proof;
 };
