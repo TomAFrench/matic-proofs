@@ -82,8 +82,7 @@ class MerkleTree {
     return proof;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  verify(value: any, index: number, root: any, proof: string | any[]): boolean {
+  static verify(value: any, index: number, root: any, proof: string | any[]): boolean {
     if (!Array.isArray(proof) || !value || !root) {
       return false;
     }
