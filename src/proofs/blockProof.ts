@@ -69,7 +69,7 @@ export const buildBlockProof = async (
   // Pull out the blocks which need to be downloaded to build merkle proof
   const checkpoint: HeaderBlockCheckpoint = await checkpointManager.headerBlocks(checkpointId.toString());
   const startBlock = BigNumber.from(checkpoint.start).toNumber();
-  const endBlock = BigNumber.from(checkpoint.start).toNumber();
+  const endBlock = BigNumber.from(checkpoint.end).toNumber();
 
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
