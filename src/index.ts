@@ -51,14 +51,23 @@ export const buildPayloadForExit = async (
   logEventSigOrIndex: string | number,
 ): Promise<ExitProof> => {
   // Check that we can actually confirm that the burn transaction exists
-  const burnTx = await maticChainProvider.getTransaction(burnTxHash);
-  if (typeof burnTx === null) {
+  const burnTxReceipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
+  if (typeof burnTxReceipt === null) {
     throw new Error("Could not find transaction corresponding to burnTxHash");
-  } else if (typeof burnTx.blockNumber === "undefined") {
+  } else if (typeof burnTxReceipt.blockNumber === "undefined") {
     throw new Error("Could not find blocknumber of burnTx");
-  } else if (typeof burnTx.blockHash === "undefined") {
+  } else if (typeof burnTxReceipt.blockHash === "undefined") {
     throw new Error("Could not find blockHash of burnTx");
   }
+
+  // If user has provided a string, find index of the first matching withdraw event in the receipt.
+  // If user has provided a number, take this as the index of the desired withdrawal event.
+  // This is necessary as a transaction can have multiple withdrawals.
+  const logIndex =
+    typeof logEventSigOrIndex === "string" ? getLogIndex(burnTxReceipt, logEventSigOrIndex) : logEventSigOrIndex;
+
+  // Build proof that the burn transaction is included in this block.
+  const { receipt, receiptProof } = await buildReceiptProof(maticChainProvider, burnTxHash);
 
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
@@ -69,16 +78,7 @@ export const buildPayloadForExit = async (
     receiptsRoot,
     headerBlockNumber,
     blockProof,
-  } = await buildBlockProof(rootChainProvider, maticChainProvider, rootChainContractAddress, burnTx.blockNumber);
-
-  // Build proof that the burn transaction is included in this block.
-  const { receipt, receiptProof } = await buildReceiptProof(maticChainProvider, burnTxHash);
-
-  // If user has provided a string, find index of the first matching withdraw event in the receipt.
-  // If user has provided a number, take this as the index of the desired withdrawal event.
-  // This is necessary as a transaction can have multiple withdrawals.
-  const logIndex =
-    typeof logEventSigOrIndex === "string" ? getLogIndex(receipt, logEventSigOrIndex) : logEventSigOrIndex;
+  } = await buildBlockProof(rootChainProvider, maticChainProvider, rootChainContractAddress, burnTxReceipt.blockNumber);
 
   return {
     headerBlockNumber,
