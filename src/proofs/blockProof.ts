@@ -35,6 +35,23 @@ const getMerkleTreeBlocks = async (
   return blocks;
 };
 
+const buildMerkleProof = async (
+  burnTxBlock: RequiredBlockMembers,
+  blocks: RequiredBlockMembers[],
+  checkpointId: BigNumber,
+) => {
+  const blockProof = new MerkleTree(blocks.map(getBlockHeader)).getProof(getBlockHeader(burnTxBlock));
+
+  return {
+    burnTxBlockNumber: BigNumber.from(burnTxBlock.number).toNumber(),
+    burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),
+    transactionsRoot: Buffer.from(burnTxBlock.transactionsRoot.slice(2), "hex"),
+    receiptsRoot: Buffer.from(burnTxBlock.receiptsRoot.slice(2), "hex"),
+    headerBlockNumber: checkpointId.toNumber(),
+    blockProof,
+  };
+};
+
 export const buildBlockProof = async (
   rootChainProvider: Provider,
   maticChainProvider: JsonRpcProvider,
@@ -58,14 +75,5 @@ export const buildBlockProof = async (
   // Proves that a block with the stated blocknumber has been included in a checkpoint
   const blocks = await getMerkleTreeBlocks(maticChainProvider, startBlock, endBlock);
   const burnTxBlock = blocks[BigNumber.from(blockNumber).sub(startBlock).toNumber()];
-  const blockProof = new MerkleTree(blocks.map(getBlockHeader)).getProof(getBlockHeader(burnTxBlock));
-
-  return {
-    burnTxBlockNumber: BigNumber.from(blockNumber).toNumber(),
-    burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),
-    transactionsRoot: Buffer.from(burnTxBlock.transactionsRoot.slice(2), "hex"),
-    receiptsRoot: Buffer.from(burnTxBlock.receiptsRoot.slice(2), "hex"),
-    headerBlockNumber: checkpointId.toNumber(),
-    blockProof,
-  };
+  return buildMerkleProof(burnTxBlock, blocks, checkpointId);
 };
