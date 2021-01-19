@@ -1,14 +1,13 @@
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
 import BN from "bn.js";
-import { map } from "bluebird";
 import { toBuffer, keccak256 } from "ethereumjs-util";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import MerkleTree from "../utils/merkleTree";
-import { getFullBlockByNumber } from "../utils/blocks";
 import { BlockProof, HeaderBlockCheckpoint, RequiredBlockMembers } from "../types";
 import { findBlockCheckpointId } from "../utils/checkpoint";
 import { isBlockCheckpointed } from "../checks";
 import { getCheckpointManager } from "../utils/contracts";
+import { getBlocksInRange } from "../utils/blocks";
 
 const getBlockHeader = (block: RequiredBlockMembers): Buffer => {
   const n = new BN(BigNumber.from(block.number).toString()).toArrayLike(Buffer, "be", 32);
@@ -16,23 +15,6 @@ const getBlockHeader = (block: RequiredBlockMembers): Buffer => {
   const txRoot = toBuffer(block.transactionsRoot);
   const receiptsRoot = toBuffer(block.receiptsRoot);
   return keccak256(Buffer.concat([n, ts, txRoot, receiptsRoot]));
-};
-
-const getMerkleTreeBlocks = async (
-  maticChainProvider: JsonRpcProvider,
-  start: number,
-  end: number,
-): Promise<RequiredBlockMembers[]> => {
-  const blocks = new Array(end - start + 1);
-  await map(
-    blocks,
-    async (_, index: number) => {
-      blocks[index] = await getFullBlockByNumber(maticChainProvider, start + index);
-    },
-    { concurrency: 10 },
-  );
-
-  return blocks;
 };
 
 const buildMerkleProof = async (
@@ -73,7 +55,7 @@ export const buildBlockProof = async (
 
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
-  const blocks = await getMerkleTreeBlocks(maticChainProvider, startBlock, endBlock);
+  const blocks = await getBlocksInRange(maticChainProvider, startBlock, endBlock);
   const burnTxBlock = blocks[BigNumber.from(blockNumber).sub(startBlock).toNumber()];
   return buildMerkleProof(burnTxBlock, blocks, checkpointId);
 };
