@@ -5,9 +5,10 @@ import { toBuffer, keccak256 } from "ethereumjs-util";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import MerkleTree from "../utils/merkleTree";
 import { getFullBlockByNumber } from "../utils/blocks";
-import { BlockProof, RequiredBlockMembers } from "../types";
-import { findBlockCheckpoint } from "../utils/checkpoint";
+import { BlockProof, HeaderBlockCheckpoint, RequiredBlockMembers } from "../types";
+import { findBlockCheckpointId } from "../utils/checkpoint";
 import { isBlockCheckpointed } from "../checks";
+import { getCheckpointManager } from "../utils/contracts";
 
 const getBlockHeader = (block: RequiredBlockMembers): Buffer => {
   const n = new BN(BigNumber.from(block.number).toString()).toArrayLike(Buffer, "be", 32);
@@ -45,12 +46,11 @@ export const buildBlockProof = async (
     throw new Error("Block has not been checkpointed yet");
   }
 
-  const [checkpointId, checkpoint] = await findBlockCheckpoint(
-    rootChainProvider,
-    rootChainContractAddress,
-    blockNumber,
-  );
+  const checkpointManager = await getCheckpointManager(rootChainProvider, rootChainContractAddress);
+  const checkpointId = await findBlockCheckpointId(checkpointManager, blockNumber);
 
+  // Pull out the blocks which need to be downloaded to build merkle proof
+  const checkpoint: HeaderBlockCheckpoint = await checkpointManager.headerBlocks(checkpointId.toString());
   const startBlock = BigNumber.from(checkpoint.start).toNumber();
   const endBlock = BigNumber.from(checkpoint.start).toNumber();
 

@@ -1,8 +1,5 @@
 import { Contract } from "@ethersproject/contracts";
-import { Provider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import { HeaderBlockCheckpoint } from "../types";
-import { getCheckpointManager } from "./contracts";
 
 const checkBlockInCheckpoint = async (
   checkpointManager: Contract,
@@ -25,8 +22,14 @@ const checkBlockInCheckpoint = async (
   return 0;
 };
 
-export const findHeaderBlockNumber = async (
-  checkpointManagerContract: Contract,
+/**
+ * Searches for checkpoint of a particular childChain block on rootChainManager contract using binary search
+ * @param checkpointManager        Ethers contract object for CheckpointManager contract
+ * @param blockNumber              Blocknumber on the matic chain of which we are searching for the checkpoint of
+ * @returns A BigNumber containing the id of the checkpoint which contains the specified block
+ */
+export const findBlockCheckpointId = async (
+  checkpointManager: Contract,
   childBlockNumber: BigNumberish,
   checkpointIdInterval: BigNumberish = BigNumber.from(10000),
 ): Promise<BigNumber> => {
@@ -36,7 +39,7 @@ export const findHeaderBlockNumber = async (
   let start = BigNumber.from(1);
 
   // last checkpoint id = end * 10000
-  let end = BigNumber.from(await checkpointManagerContract.currentHeaderBlock()).div(checkpointIdInterval);
+  let end = BigNumber.from(await checkpointManager.currentHeaderBlock()).div(checkpointIdInterval);
   if (start.gt(end)) {
     throw new Error("start block is greater than end block");
   }
@@ -51,7 +54,7 @@ export const findHeaderBlockNumber = async (
 
     // eslint-disable-next-line no-await-in-loop
     const checkpointStatus = await checkBlockInCheckpoint(
-      checkpointManagerContract,
+      checkpointManager,
       mid.mul(checkpointIdInterval).toString(),
       childBlockNumber,
     );
@@ -72,22 +75,4 @@ export const findHeaderBlockNumber = async (
         throw new Error("Error finding correct checkpoint ID");
     }
   }
-};
-
-/**
- * Searches for checkpoint of a particular childChain block on rootChainManager contract using binary search
- * @param rootChainProvider        Ethers provider object for querying the rootChainManager contract
- * @param rootChainContractAddress Address of the rootChainManager contract
- * @param blockNumber              Blocknumber on the matic chain of which we are searching for the checkpoint of
- * @returns A tuple of the id of the checkpoint object which contains the specified block and it's contents
- */
-export const findBlockCheckpoint = async (
-  rootChainProvider: Provider,
-  rootChainContractAddress: string,
-  blockNumber: BigNumberish,
-): Promise<[BigNumber, HeaderBlockCheckpoint]> => {
-  const checkpointManagerContract = await getCheckpointManager(rootChainProvider, rootChainContractAddress);
-  const headerBlockNumber = await findHeaderBlockNumber(checkpointManagerContract, blockNumber);
-  const headerBlock = await checkpointManagerContract.headerBlocks(headerBlockNumber.toString());
-  return [headerBlockNumber, headerBlock];
 };
