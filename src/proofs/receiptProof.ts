@@ -54,7 +54,6 @@ export const receiptMerklePatriciaProof = async (
   }
 
   return {
-    blockHash: toBuffer(receipt.blockHash),
     parentNodes: (stack.map(trieNode => trieNode.raw()) as unknown) as Buffer[],
     root: blockHeaderFromRpc(block).receiptTrie,
     path: Buffer.concat([Buffer.from("00", "hex"), rlp.encode(receipt.transactionIndex)]),

@@ -20,7 +20,6 @@ export type HeaderBlockCheckpoint = {
 };
 
 export type ReceiptMPProof = {
-  blockHash: Buffer;
   parentNodes: Buffer[];
   root: Buffer;
   path: Buffer;
