@@ -4,6 +4,27 @@ import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { HeaderBlockCheckpoint } from "../types";
 import { getCheckpointManager } from "./contracts";
 
+const checkBlockInCheckpoint = async (
+  checkpointManager: Contract,
+  targetBlockNumber: BigNumberish,
+  checkpointId: BigNumber,
+) => {
+  const headerBlock = await checkpointManager.headerBlocks(checkpointId.toString());
+  const headerStart = BigNumber.from(headerBlock.start);
+  const headerEnd = BigNumber.from(headerBlock.end);
+
+  if (headerStart.gt(targetBlockNumber)) {
+    // targetBlockNumber was checkpointed before this headerBlock
+    return -1;
+  }
+  if (headerEnd.lt(targetBlockNumber)) {
+    // targetBlockNumber was checkpointed after this headerBlock
+    return 1;
+  }
+  // targetBlockNumber is between the upper and lower bounds of the headerBlock, we found our answer
+  return 0;
+};
+
 export const findHeaderBlockNumber = async (
   checkpointManagerContract: Contract,
   childBlockNumber: BigNumberish,
@@ -21,31 +42,36 @@ export const findHeaderBlockNumber = async (
   }
 
   // binary search on all the checkpoints to find the checkpoint that contains the childBlockNumber
-  let ans = start;
-  while (start.lte(end)) {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
     if (start.eq(end)) {
-      ans = start;
-      break;
+      return start.mul(checkpointIdInterval);
     }
     const mid = start.add(end).div(2);
-    // eslint-disable-next-line no-await-in-loop
-    const headerBlock = await checkpointManagerContract.headerBlocks(mid.mul(checkpointIdInterval).toString());
-    const headerStart = BigNumber.from(headerBlock.start);
-    const headerEnd = BigNumber.from(headerBlock.end);
 
-    if (headerStart.lte(childBlockNumber) && childBlockNumber.lte(headerEnd)) {
-      // if childBlockNumber is between the upper and lower bounds of the headerBlock, we found our answer
-      ans = mid;
-      break;
-    } else if (headerStart.gt(childBlockNumber)) {
-      // childBlockNumber was checkpointed before this header
-      end = mid.sub(1);
-    } else if (headerEnd.lt(childBlockNumber)) {
-      // childBlockNumber was checkpointed after this header
-      start = mid.add(1);
+    // eslint-disable-next-line no-await-in-loop
+    const checkpointStatus = await checkBlockInCheckpoint(
+      checkpointManagerContract,
+      mid.mul(checkpointIdInterval).toString(),
+      childBlockNumber,
+    );
+
+    switch (checkpointStatus) {
+      case 0:
+        // childBlockNumber is in this checkpoint, we found our answer
+        return mid.mul(checkpointIdInterval);
+      case -1:
+        // childBlockNumber was checkpointed before this checkpoint
+        end = mid.sub(1);
+        break;
+      case 1:
+        // childBlockNumber was checkpointed after this checkpoint
+        start = mid.add(1);
+        break;
+      default:
+        throw new Error("Error finding correct checkpoint ID");
     }
   }
-  return ans.mul(checkpointIdInterval);
 };
 
 /**
