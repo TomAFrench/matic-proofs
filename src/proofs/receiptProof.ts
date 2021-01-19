@@ -1,4 +1,4 @@
-import { JsonRpcProvider, Provider, TransactionReceipt } from "@ethersproject/providers";
+import { JsonRpcProvider, TransactionReceipt } from "@ethersproject/providers";
 import { BaseTrie } from "merkle-patricia-tree";
 import { rlp, toBuffer } from "ethereumjs-util";
 import blockHeaderFromRpc from "ethereumjs-block/header-from-rpc";
@@ -40,12 +40,11 @@ const buildReceiptTrie = async (receipts: TransactionReceipt[]) => {
   return receiptsTrie;
 };
 
-export const receiptMerklePatriciaProof = async (
-  provider: Provider,
+export const buildMerklePatriciaProof = async (
   receipt: TransactionReceipt,
+  receipts: TransactionReceipt[],
   block: RequiredBlockMembers,
 ): Promise<ReceiptMPProof> => {
-  const receipts = await Promise.all(block.transactions.map(tx => provider.getTransactionReceipt(tx)));
   const receiptsTrie = await buildReceiptTrie(receipts);
   const { node, remaining, stack } = await receiptsTrie.findPath(rlp.encode(receipt.transactionIndex));
 
@@ -55,7 +54,7 @@ export const receiptMerklePatriciaProof = async (
 
   return {
     parentNodes: (stack.map(trieNode => trieNode.raw()) as unknown) as Buffer[],
-    root: blockHeaderFromRpc(block).receiptTrie,
+    root: blockHeaderFromRpc(block).receiptTrie, // TODO: pull this from trie
     path: Buffer.concat([Buffer.from("00", "hex"), rlp.encode(receipt.transactionIndex)]),
     value: rlp.decode(node.value),
   };
@@ -67,8 +66,10 @@ export const buildReceiptProof = async (
 ): Promise<ReceiptProof> => {
   const receipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
   const burnTxBlock = await getFullBlockByHash(maticChainProvider, receipt.blockHash);
+  const receipts = await Promise.all(burnTxBlock.transactions.map(tx => maticChainProvider.getTransactionReceipt(tx)));
+
   // Build proof that the burn transaction is included in this block.
-  const receiptProof = await receiptMerklePatriciaProof(maticChainProvider, receipt, burnTxBlock);
+  const receiptProof = await buildMerklePatriciaProof(receipt, receipts, burnTxBlock);
 
   return {
     receipt,

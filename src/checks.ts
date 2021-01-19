@@ -3,7 +3,7 @@ import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { keccak256 as solidityKeccak256 } from "@ethersproject/solidity";
 import { bufferToHex } from "ethereumjs-util";
 
-import { receiptMerklePatriciaProof } from "./proofs/receiptProof";
+import { buildMerklePatriciaProof } from "./proofs/receiptProof";
 import { getFullBlockByHash } from "./utils/blocks";
 import { getLogIndex } from "./utils/logIndex";
 import { RequiredBlockMembers } from "./types";
@@ -20,7 +20,8 @@ const calculateExitHash = async (
   }
 
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
-  const { path } = await receiptMerklePatriciaProof(maticChainProvider, burnTxReceipt, burnTxBlock);
+  const receipts = await Promise.all(burnTxBlock.transactions.map(tx => maticChainProvider.getTransactionReceipt(tx)));
+  const { path } = await buildMerklePatriciaProof(burnTxReceipt, receipts, burnTxBlock);
 
   const nibbleArray: Buffer[] = [];
   // RootChain.sol drops first byte (2 nibbles) from nibble array when calculating nibbleArray
