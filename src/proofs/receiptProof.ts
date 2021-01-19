@@ -27,8 +27,7 @@ export const getReceiptBytes = (receipt: TransactionReceipt): Buffer => {
   ]);
 };
 
-const buildReceiptTrie = async (provider: Provider, block: RequiredBlockMembers) => {
-  const receipts = await Promise.all(block.transactions.map(tx => provider.getTransactionReceipt(tx)));
+const buildReceiptTrie = async (receipts: TransactionReceipt[]) => {
   const receiptsTrie = new BaseTrie();
   // Add all receipts to the trie
   for (let i = 0; i < receipts.length; i += 1) {
@@ -46,7 +45,8 @@ export const receiptMerklePatriciaProof = async (
   receipt: TransactionReceipt,
   block: RequiredBlockMembers,
 ): Promise<ReceiptMPProof> => {
-  const receiptsTrie = await buildReceiptTrie(provider, block);
+  const receipts = await Promise.all(block.transactions.map(tx => provider.getTransactionReceipt(tx)));
+  const receiptsTrie = await buildReceiptTrie(receipts);
   const { node, remaining, stack } = await receiptsTrie.findPath(rlp.encode(receipt.transactionIndex));
 
   if (node === null || remaining.length > 0) {
