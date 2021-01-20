@@ -1,9 +1,8 @@
 import { JsonRpcProvider, TransactionReceipt } from "@ethersproject/providers";
 import { BaseTrie } from "merkle-patricia-tree";
 import { rlp, toBuffer } from "ethereumjs-util";
-import blockHeaderFromRpc from "ethereumjs-block/header-from-rpc";
 import { BigNumber } from "@ethersproject/bignumber";
-import { ReceiptMPProof, ReceiptProof, RequiredBlockMembers } from "../types";
+import { ReceiptMPProof, ReceiptProof } from "../types";
 import { getFullBlockByHash } from "../utils/blocks";
 
 export const getReceiptBytes = (receipt: TransactionReceipt): Buffer => {
@@ -43,7 +42,6 @@ const buildReceiptTrie = async (receipts: TransactionReceipt[]) => {
 export const buildMerklePatriciaProof = async (
   receipt: TransactionReceipt,
   receipts: TransactionReceipt[],
-  block: RequiredBlockMembers,
 ): Promise<ReceiptMPProof> => {
   const receiptsTrie = await buildReceiptTrie(receipts);
   const { node, remaining, stack } = await receiptsTrie.findPath(rlp.encode(receipt.transactionIndex));
@@ -53,8 +51,8 @@ export const buildMerklePatriciaProof = async (
   }
 
   return {
-    parentNodes: (stack.map(trieNode => trieNode.raw()) as unknown) as Buffer[],
-    root: blockHeaderFromRpc(block).receiptTrie, // TODO: pull this from trie
+    parentNodes: stack.map(stackElem => stackElem.serialize()),
+    root: receiptsTrie.root,
     path: Buffer.concat([Buffer.from("00", "hex"), rlp.encode(receipt.transactionIndex)]),
     value: rlp.decode(node.value),
   };
@@ -69,7 +67,7 @@ export const buildReceiptProof = async (
   const receipts = await Promise.all(burnTxBlock.transactions.map(tx => maticChainProvider.getTransactionReceipt(tx)));
 
   // Build proof that the burn transaction is included in this block.
-  const receiptProof = await buildMerklePatriciaProof(receipt, receipts, burnTxBlock);
+  const receiptProof = await buildMerklePatriciaProof(receipt, receipts);
 
   return {
     receipt,

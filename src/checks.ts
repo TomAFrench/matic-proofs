@@ -21,7 +21,7 @@ const calculateExitHash = async (
 
   const burnTxBlock: RequiredBlockMembers = await getFullBlockByHash(maticChainProvider, burnTxReceipt.blockHash);
   const receipts = await Promise.all(burnTxBlock.transactions.map(tx => maticChainProvider.getTransactionReceipt(tx)));
-  const { path } = await buildMerklePatriciaProof(burnTxReceipt, receipts, burnTxBlock);
+  const { path } = await buildMerklePatriciaProof(burnTxReceipt, receipts);
 
   const nibbleArray: Buffer[] = [];
   // RootChain.sol drops first byte (2 nibbles) from nibble array when calculating nibbleArray
