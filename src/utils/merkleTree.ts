@@ -11,7 +11,7 @@ class MerkleTree {
       throw new Error("At least 1 leaf needed");
     }
 
-    const depth = Math.ceil(Math.log(leaves.length) / Math.log(2));
+    const depth = Math.ceil(Math.log2(leaves.length));
     if (depth > 20) {
       throw new Error("Depth must be 20 or less");
     }
