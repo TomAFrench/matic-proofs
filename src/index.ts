@@ -7,6 +7,7 @@ import { ExitProof } from "./types";
 import { buildBlockProof } from "./proofs/blockProof";
 import { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
 import { getLogIndex } from "./utils/logIndex";
+import { hexToBuffer } from "./utils/buffer";
 
 export { buildBlockProof } from "./proofs/blockProof";
 export { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
@@ -31,11 +32,11 @@ export const encodePayload = ({
 }: ExitProof): string =>
   encode([
     headerBlockNumber,
-    bufferToHex(Buffer.concat(blockProof)),
+    bufferToHex(Buffer.concat(blockProof.map(hexToBuffer))),
     burnTxBlockNumber,
     burnTxBlockTimestamp,
-    bufferToHex(transactionsRoot),
-    bufferToHex(receiptsRoot),
+    transactionsRoot,
+    receiptsRoot,
     bufferToHex(receipt),
     encode(receiptProofParentNodes),
     bufferToHex(receiptProofPath),

@@ -3,7 +3,6 @@ import blockList from "./mockResponses/blocks.json";
 import MerkleTree from "../src/utils/merkleTree";
 import { buildMerkleProof, getBlockHeader } from "../src/proofs/blockProof";
 import { HeaderBlockCheckpoint, RequiredBlockMembers } from "../src/types";
-import { hexToBuffer } from "../src/utils/buffer";
 
 const checkpointId = BigNumber.from(96830000);
 const checkpoint: HeaderBlockCheckpoint = {
@@ -22,9 +21,7 @@ describe("buildMerkleProof", function () {
     const blockProof = await buildMerkleProof(block, blocks, checkpointId);
 
     const index = BigNumber.from(block.number).sub(checkpoint.start).toNumber();
-    expect(MerkleTree.verify(getBlockHeader(block), index, hexToBuffer(checkpoint.root), blockProof.blockProof)).toBe(
-      true,
-    );
+    expect(MerkleTree.verify(getBlockHeader(block), index, checkpoint.root, blockProof.blockProof)).toBe(true);
 
     process.stdout.write(`\r      Proof verified for block ${index + 1}`);
   });

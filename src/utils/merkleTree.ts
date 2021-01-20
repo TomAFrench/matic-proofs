@@ -1,11 +1,12 @@
-import { keccak256, zeros } from "ethereumjs-util";
+import { keccak256 as solidityKeccak256 } from "@ethersproject/solidity";
+import { HashZero } from "@ethersproject/constants";
 
 class MerkleTree {
-  private leaves: Buffer[];
+  private leaves: string[];
 
-  private layers: Buffer[][];
+  private layers: string[][];
 
-  constructor(leaves: Buffer[] = []) {
+  constructor(leaves: string[] = []) {
     if (leaves.length < 1) {
       throw new Error("At least 1 leaf needed");
     }
@@ -15,12 +16,12 @@ class MerkleTree {
       throw new Error("Depth must be 20 or less");
     }
 
-    this.leaves = leaves.concat(Array.from(Array(2 ** depth - leaves.length), () => zeros(32)));
+    this.leaves = leaves.concat(Array.from(Array(2 ** depth - leaves.length), () => HashZero));
     this.layers = [this.leaves];
     this.createHashes(this.leaves);
   }
 
-  private createHashes(nodes: Buffer[]): boolean {
+  private createHashes(nodes: string[]): boolean {
     if (nodes.length === 1) {
       // Reached the top of the tree
       return true;
@@ -30,8 +31,7 @@ class MerkleTree {
     for (let i = 0; i < nodes.length; i += 2) {
       const left = nodes[i];
       const right = nodes[i + 1];
-      const data = Buffer.concat([left, right]);
-      treeLevel.push(keccak256(data));
+      treeLevel.push(solidityKeccak256(["bytes32", "bytes32"], [left, right]));
     }
 
     // is odd number of nodes
@@ -43,22 +43,22 @@ class MerkleTree {
     return this.createHashes(treeLevel);
   }
 
-  getLeaves(): Buffer[] {
+  getLeaves(): string[] {
     return this.leaves;
   }
 
-  getLayers(): Buffer[][] {
+  getLayers(): string[][] {
     return this.layers;
   }
 
-  getRoot(): Buffer {
+  getRoot(): string {
     return this.layers[this.layers.length - 1][0];
   }
 
-  getProof(leaf: Buffer): Buffer[] {
+  getProof(leaf: string): string[] {
     let index = -1;
     for (let i = 0; i < this.leaves.length; i += 1) {
-      if (Buffer.compare(leaf, this.leaves[i]) === 0) {
+      if (leaf === this.leaves[i]) {
         index = i;
       }
     }
@@ -82,7 +82,7 @@ class MerkleTree {
     return proof;
   }
 
-  static verify(value: any, index: number, root: any, proof: string | any[]): boolean {
+  static verify(value: string, index: number, root: string, proof: string[]): boolean {
     if (!Array.isArray(proof) || !value || !root) {
       return false;
     }
@@ -92,15 +92,15 @@ class MerkleTree {
     for (let i = 0; i < proof.length; i += 1) {
       const node = proof[i];
       if (currentIndex % 2 === 0) {
-        hash = keccak256(Buffer.concat([hash, node]));
+        hash = solidityKeccak256(["bytes32", "bytes32"], [hash, node]);
       } else {
-        hash = keccak256(Buffer.concat([node, hash]));
+        hash = solidityKeccak256(["bytes32", "bytes32"], [node, hash]);
       }
 
       currentIndex = Math.floor(currentIndex / 2);
     }
 
-    return Buffer.compare(hash, root) === 0;
+    return hash === root;
   }
 }
 

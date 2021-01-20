@@ -27,10 +27,10 @@ export type ReceiptMPProof = {
 export interface BlockProof {
   burnTxBlockNumber: number;
   burnTxBlockTimestamp: number;
-  transactionsRoot: Buffer;
-  receiptsRoot: Buffer;
+  transactionsRoot: string;
+  receiptsRoot: string;
   headerBlockNumber: number;
-  blockProof: Buffer[];
+  blockProof: string[];
 }
 
 export type ReceiptProof = {
@@ -41,11 +41,11 @@ export type ReceiptProof = {
 
 export interface ExitProof {
   headerBlockNumber: number;
-  blockProof: Buffer[];
+  blockProof: string[];
   burnTxBlockNumber: number;
   burnTxBlockTimestamp: number;
-  transactionsRoot: Buffer;
-  receiptsRoot: Buffer;
+  transactionsRoot: string;
+  receiptsRoot: string;
   receipt: Buffer;
   receiptProofParentNodes: Buffer[];
   receiptProofPath: Buffer;

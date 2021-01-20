@@ -7,16 +7,12 @@ import { findBlockCheckpointId } from "../utils/checkpoint";
 import { isBlockCheckpointed } from "../checks";
 import { getCheckpointManager } from "../utils/contracts";
 import { getBlocksInRange } from "../utils/blocks";
-import { hexToBuffer } from "../utils/buffer";
 
-export const getBlockHeader = (block: RequiredBlockMembers): Buffer => {
-  return hexToBuffer(
-    solidityKeccak256(
-      ["uint256", "uint256", "bytes32", "bytes32"],
-      [block.number, block.timestamp, block.transactionsRoot, block.receiptsRoot],
-    ),
+export const getBlockHeader = (block: RequiredBlockMembers): string =>
+  solidityKeccak256(
+    ["uint256", "uint256", "bytes32", "bytes32"],
+    [block.number, block.timestamp, block.transactionsRoot, block.receiptsRoot],
   );
-};
 
 export const buildMerkleProof = async (
   burnTxBlock: RequiredBlockMembers,
@@ -28,8 +24,8 @@ export const buildMerkleProof = async (
   return {
     burnTxBlockNumber: BigNumber.from(burnTxBlock.number).toNumber(),
     burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),
-    transactionsRoot: hexToBuffer(burnTxBlock.transactionsRoot),
-    receiptsRoot: hexToBuffer(burnTxBlock.receiptsRoot),
+    transactionsRoot: burnTxBlock.transactionsRoot,
+    receiptsRoot: burnTxBlock.receiptsRoot,
     headerBlockNumber: checkpointId.toNumber(),
     blockProof,
   };

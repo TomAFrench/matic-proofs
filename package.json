@@ -46,7 +46,6 @@
   },
   "dependencies": {
     "bluebird": "^3.7.2",
-    "bn.js": "^5.1.1",
     "ethereumjs-util": "^7.0.5",
     "merkle-patricia-tree": "^4.0.0"
   },
