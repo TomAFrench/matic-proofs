@@ -6,6 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "shx rm -rf ./lib",
+    "test": "jest",
     "build": "yarn clean && tsc -p tsconfig.production.json",
     "lint": "eslint src/**/*.ts test/**/*.js"
   },
@@ -31,20 +32,20 @@
     "@ethersproject/rlp": "^5.0.3",
     "@ethersproject/solidity": "^5.0.5",
     "@types/bluebird": "^3.5.32",
-    "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
-    "chai-bn": "^0.2.1",
+    "@types/jest": "^26.0.20",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-typescript-prettier": "^3.1.0",
     "eth-json-rpc-filters": "^4.1.1",
+    "jest": "^26.6.3",
     "prettier": "^2.1.2",
     "shx": "^0.3.2",
+    "ts-jest": "^26.4.4",
+    "ts-node": "^9.1.1",
     "typescript": "^3.9.7"
   },
   "dependencies": {
     "bluebird": "^3.7.2",
     "bn.js": "^5.1.1",
-    "ethereumjs-block": "^2.2.2",
     "ethereumjs-util": "^7.0.5",
     "merkle-patricia-tree": "^4.0.0"
   },
