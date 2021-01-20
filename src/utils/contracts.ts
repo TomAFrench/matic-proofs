@@ -19,7 +19,11 @@ export const getCheckpointManager = async (
   const checkpointManagerAddress = await rootChainContract.checkpointManagerAddress();
   const checkpointManagerContract = new Contract(
     checkpointManagerAddress,
-    ["function currentHeaderBlock() view returns (uint256)", "function getLastChildBlock() view returns (uint256)"],
+    [
+      "function currentHeaderBlock() view returns (uint256)",
+      "function headerBlocks(uint256 checkpointId) view returns (tuple(bytes32 root, uint256 start, uint256 end, uint256 createdAt, address proposer) checkpoint)",
+      "function getLastChildBlock() view returns (uint256)",
+    ],
     rootChainProvider,
   );
 
