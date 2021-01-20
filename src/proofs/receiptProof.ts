@@ -2,6 +2,7 @@ import { JsonRpcProvider, TransactionReceipt } from "@ethersproject/providers";
 import { BaseTrie } from "merkle-patricia-tree";
 import { arrayify } from "@ethersproject/bytes";
 import { encode } from "@ethersproject/rlp";
+import { BigNumber } from "@ethersproject/bignumber";
 import { ReceiptMPProof, ReceiptProof } from "../types";
 import { getFullBlockByHash } from "../utils/blocks";
 import { hexToBuffer } from "../utils/buffer";
@@ -12,7 +13,7 @@ export const getReceiptBytes = (receipt: TransactionReceipt): Buffer => {
       // eslint-disable-next-line no-nested-ternary
       arrayify(receipt.status !== undefined && receipt.status != null ? (receipt.status ? 1 : 0) : receipt.root || ""),
 
-      arrayify(receipt.cumulativeGasUsed),
+      arrayify(BigNumber.from(receipt.cumulativeGasUsed)),
       receipt.logsBloom,
 
       // encoded log array

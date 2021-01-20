@@ -3,6 +3,8 @@ import { JsonRpcProvider, Provider } from "@ethersproject/providers";
 import { bufferToHex } from "ethereumjs-util";
 
 import { encode } from "@ethersproject/rlp";
+import { BigNumber } from "@ethersproject/bignumber";
+import { arrayify } from "@ethersproject/bytes";
 import { ExitProof } from "./types";
 import { buildBlockProof } from "./proofs/blockProof";
 import { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
@@ -31,16 +33,16 @@ export const encodePayload = ({
   logIndex,
 }: ExitProof): string =>
   encode([
-    headerBlockNumber,
+    arrayify(BigNumber.from(headerBlockNumber)),
     bufferToHex(Buffer.concat(blockProof.map(hexToBuffer))),
-    burnTxBlockNumber,
-    burnTxBlockTimestamp,
+    arrayify(BigNumber.from(burnTxBlockNumber)),
+    arrayify(BigNumber.from(burnTxBlockTimestamp)),
     transactionsRoot,
     receiptsRoot,
     bufferToHex(receipt),
     encode(receiptProofParentNodes),
     bufferToHex(receiptProofPath),
-    logIndex,
+    arrayify(BigNumber.from(logIndex)),
   ]);
 
 export const buildPayloadForExit = async (
