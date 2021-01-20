@@ -1,34 +1,35 @@
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
-import BN from "bn.js";
-import { toBuffer, keccak256 } from "ethereumjs-util";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { keccak256 as solidityKeccak256 } from "@ethersproject/solidity";
 import MerkleTree from "../utils/merkleTree";
 import { BlockProof, HeaderBlockCheckpoint, RequiredBlockMembers } from "../types";
 import { findBlockCheckpointId } from "../utils/checkpoint";
 import { isBlockCheckpointed } from "../checks";
 import { getCheckpointManager } from "../utils/contracts";
 import { getBlocksInRange } from "../utils/blocks";
+import { hexToBuffer } from "../utils/buffer";
 
-const getBlockHeader = (block: RequiredBlockMembers): Buffer => {
-  const n = new BN(BigNumber.from(block.number).toString()).toArrayLike(Buffer, "be", 32);
-  const ts = new BN(BigNumber.from(block.timestamp).toString()).toArrayLike(Buffer, "be", 32);
-  const txRoot = toBuffer(block.transactionsRoot);
-  const receiptsRoot = toBuffer(block.receiptsRoot);
-  return keccak256(Buffer.concat([n, ts, txRoot, receiptsRoot]));
+export const getBlockHeader = (block: RequiredBlockMembers): Buffer => {
+  return hexToBuffer(
+    solidityKeccak256(
+      ["uint256", "uint256", "bytes32", "bytes32"],
+      [block.number, block.timestamp, block.transactionsRoot, block.receiptsRoot],
+    ),
+  );
 };
 
-const buildMerkleProof = async (
+export const buildMerkleProof = async (
   burnTxBlock: RequiredBlockMembers,
   blocks: RequiredBlockMembers[],
   checkpointId: BigNumber,
-) => {
+): Promise<BlockProof> => {
   const blockProof = new MerkleTree(blocks.map(getBlockHeader)).getProof(getBlockHeader(burnTxBlock));
 
   return {
     burnTxBlockNumber: BigNumber.from(burnTxBlock.number).toNumber(),
     burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),
-    transactionsRoot: Buffer.from(burnTxBlock.transactionsRoot.slice(2), "hex"),
-    receiptsRoot: Buffer.from(burnTxBlock.receiptsRoot.slice(2), "hex"),
+    transactionsRoot: hexToBuffer(burnTxBlock.transactionsRoot),
+    receiptsRoot: hexToBuffer(burnTxBlock.receiptsRoot),
     headerBlockNumber: checkpointId.toNumber(),
     blockProof,
   };
