@@ -26,10 +26,11 @@
   "devDependencies": {
     "@ethersproject/abi": "^5.0.5",
     "@ethersproject/bignumber": "^5.0.7",
+    "@ethersproject/bytes": "^5.0.9",
     "@ethersproject/constants": "^5.0.5",
     "@ethersproject/contracts": "^5.0.4",
     "@ethersproject/providers": "^5.0.9",
-    "@ethersproject/rlp": "^5.0.3",
+    "@ethersproject/rlp": "^5.0.7",
     "@ethersproject/solidity": "^5.0.5",
     "@types/bluebird": "^3.5.32",
     "@types/jest": "^26.0.20",
@@ -51,9 +52,11 @@
   },
   "peerDependencies": {
     "@ethersproject/bignumber": "^5.0.7",
+    "@ethersproject/bytes": "^5.0.9",
     "@ethersproject/constants": "^5.0.5",
     "@ethersproject/contracts": "^5.0.4",
     "@ethersproject/providers": "^5.0.9",
+    "@ethersproject/rlp": "^5.0.7",
     "@ethersproject/solidity": "^5.0.5"
   }
 }

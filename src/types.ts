@@ -1,6 +1,5 @@
 import { BigNumberish } from "@ethersproject/bignumber";
 import { TransactionReceipt } from "@ethersproject/providers";
-import { rlp } from "ethereumjs-util";
 
 export interface RequiredBlockMembers {
   difficulty: string;
@@ -23,7 +22,6 @@ export type ReceiptMPProof = {
   parentNodes: Buffer[];
   root: Buffer;
   path: Buffer;
-  value: Buffer | Buffer[] | rlp.Decoded;
 };
 
 export interface BlockProof {

@@ -1,9 +1,11 @@
 import { TransactionReceipt } from "@ethersproject/providers";
 import { BaseTrie } from "merkle-patricia-tree";
-import { rlp } from "ethereumjs-util";
 import { BigNumber } from "@ethersproject/bignumber";
+import { arrayify } from "@ethersproject/bytes";
+import { encode } from "@ethersproject/rlp";
 import receiptList from "./mockResponses/347-receipt-list.json";
 import { buildMerklePatriciaProof, getReceiptBytes } from "../src/proofs/receiptProof";
+import { hexToBuffer } from "../src/utils/buffer";
 
 const receipts = (receiptList as unknown) as TransactionReceipt[];
 
@@ -14,7 +16,7 @@ describe("buildMerklePatriciaProof", function () {
 
     const receiptBytes = await BaseTrie.verifyProof(
       receiptProof.root,
-      rlp.encode(receipt.transactionIndex),
+      hexToBuffer(encode(arrayify(receipt.transactionIndex))),
       receiptProof.parentNodes,
     );
 
