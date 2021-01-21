@@ -11,8 +11,7 @@ export const getReceiptBytes = (receipt: TransactionReceipt): Buffer => {
   return hexToBuffer(
     encode([
       // eslint-disable-next-line no-nested-ternary
-      arrayify(receipt.status !== undefined && receipt.status != null ? (receipt.status ? 1 : 0) : receipt.root || ""),
-
+      receipt.status ? "0x01" : "0x00",
       arrayify(BigNumber.from(receipt.cumulativeGasUsed)),
       receipt.logsBloom,
 
