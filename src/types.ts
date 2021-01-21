@@ -36,7 +36,7 @@ export interface BlockProof {
 export type ReceiptProof = {
   receipt: TransactionReceipt;
   receiptProof: ReceiptMPProof;
-  receiptsRoot: Buffer;
+  receiptsRoot: string;
 };
 
 export interface ExitProof {

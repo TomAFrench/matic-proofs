@@ -75,6 +75,6 @@ export const buildReceiptProof = async (
   return {
     receipt,
     receiptProof,
-    receiptsRoot: Buffer.from(burnTxBlock.receiptsRoot.slice(2), "hex"),
+    receiptsRoot: burnTxBlock.receiptsRoot,
   };
 };
