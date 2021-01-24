@@ -4,6 +4,7 @@ import { TransactionReceipt } from "@ethersproject/providers";
 import { hexConcat, hexlify } from "@ethersproject/bytes";
 import { Contract } from "@ethersproject/contracts";
 import { encode } from "@ethersproject/rlp";
+import block from "../mockResponses/347-block.json";
 import receiptList from "../mockResponses/347-receipt-list.json";
 import { buildMerklePatriciaProof, getReceiptBytes } from "../../src/proofs/receiptProof";
 
@@ -18,7 +19,7 @@ export function testBuildMerklePatriciaProof(): void {
   });
 
   it.each(receipts.slice(0, 1))("should generate a valid proof", async (receipt: TransactionReceipt) => {
-    const receiptProof = await buildMerklePatriciaProof(receipt, receipts);
+    const receiptProof = await buildMerklePatriciaProof(receipt, receipts, block.number.toString(), block.hash);
     const key = hexConcat(["0x00", hexlify(receipt.transactionIndex)]);
     const rlpParentNodes = encode(receiptProof.parentNodes);
     expect(await merklePatricia.verify(getReceiptBytes(receipt), key, rlpParentNodes, receiptProof.root)).toBe(true);

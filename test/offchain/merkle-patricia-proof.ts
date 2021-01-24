@@ -14,13 +14,13 @@ const receipts = (receiptList as unknown) as TransactionReceipt[];
 
 export function testBuildMerklePatriciaProof(): void {
   it("produces a trie which matches block's receipt root", async () => {
-    const receiptProof = await buildMerklePatriciaProof(receipts[0], receipts);
+    const receiptProof = await buildMerklePatriciaProof(receipts[0], receipts, block.number.toString(), block.hash);
 
     expect(receiptProof.root).toBe(block.receiptsRoot);
   });
 
   it.skip.each(receipts.slice(0, 1))("should generate a valid proof", async (receipt: TransactionReceipt) => {
-    const receiptProof = await buildMerklePatriciaProof(receipt, receipts);
+    const receiptProof = await buildMerklePatriciaProof(receipt, receipts, block.number.toString(), block.hash);
 
     const receiptBytes = await BaseTrie.verifyProof(
       hexToBuffer(receiptProof.root),
