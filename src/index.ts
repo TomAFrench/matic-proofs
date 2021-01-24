@@ -39,9 +39,9 @@ export const encodePayload = ({
     arrayify(BigNumber.from(burnTxBlockTimestamp)),
     transactionsRoot,
     receiptsRoot,
-    bufferToHex(receipt),
+    getReceiptBytes(receipt),
     encode(receiptProofParentNodes),
-    bufferToHex(receiptProofPath),
+    receiptProofPath,
     arrayify(BigNumber.from(logIndex)),
   ]);
 
@@ -89,7 +89,7 @@ export const buildPayloadForExit = async (
     burnTxBlockTimestamp,
     transactionsRoot,
     receiptsRoot,
-    receipt: getReceiptBytes(receipt), // rlp encoded
+    receipt,
     receiptProofParentNodes: receiptProof.parentNodes,
     receiptProofPath: receiptProof.path,
     logIndex,

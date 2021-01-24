@@ -4,5 +4,5 @@ module.exports = {
     coverageReporters: ["lcov", "html"],
     preset: "ts-jest",
     testEnvironment: "node",
-    testMatch: ["**/test/**/*.test.ts"],
+    testMatch: ["**/test/index.ts"],
   };

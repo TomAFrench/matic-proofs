@@ -8,6 +8,7 @@ import { getFullBlockByHash } from "./utils/blocks";
 import { getLogIndex } from "./utils/logIndex";
 import { RequiredBlockMembers } from "./types";
 import { getCheckpointManager, getRootChainManager } from "./utils/contracts";
+import { hexToBuffer } from "./utils/buffer";
 
 const calculateExitHash = async (
   maticChainProvider: JsonRpcProvider,
@@ -25,10 +26,12 @@ const calculateExitHash = async (
 
   const nibbleArray: Buffer[] = [];
   // RootChain.sol drops first byte (2 nibbles) from nibble array when calculating nibbleArray
-  path.slice(1).forEach(byte => {
-    nibbleArray.push(Buffer.from("0" + (byte / 0x10).toString(16), "hex"));
-    nibbleArray.push(Buffer.from("0" + (byte % 0x10).toString(16), "hex"));
-  });
+  hexToBuffer(path)
+    .slice(1)
+    .forEach(byte => {
+      nibbleArray.push(Buffer.from("0" + (byte / 0x10).toString(16), "hex"));
+      nibbleArray.push(Buffer.from("0" + (byte % 0x10).toString(16), "hex"));
+    });
   const nibblesHex = bufferToHex(Buffer.concat(nibbleArray));
 
   const logIndex = getLogIndex(burnTxReceipt, logEventSig);

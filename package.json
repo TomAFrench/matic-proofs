@@ -5,10 +5,11 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
+    "compile": "hardhat compile",
     "clean": "shx rm -rf ./lib",
     "test": "jest",
     "build": "yarn clean && tsc -p tsconfig.production.json",
-    "lint": "eslint src/**/*.ts test/**/*.js"
+    "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "repository": {
     "type": "git",
@@ -32,11 +33,16 @@
     "@ethersproject/providers": "^5.0.9",
     "@ethersproject/rlp": "^5.0.7",
     "@ethersproject/solidity": "^5.0.5",
+    "@openzeppelin/contracts": "3.1.0",
     "@types/bluebird": "^3.5.32",
     "@types/jest": "^26.0.20",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-typescript-prettier": "^3.1.0",
     "eth-json-rpc-filters": "^4.1.1",
+    "ethers": "^5.0.26",
+    "hardhat": "^2.0.8",
+    "hardhat-deploy": "^0.7.0-beta.44",
+    "hardhat-deploy-ethers": "^0.3.0-beta.7",
     "jest": "^26.6.3",
     "prettier": "^2.1.2",
     "shx": "^0.3.2",

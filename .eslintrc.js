@@ -25,6 +25,7 @@ module.exports = {
         "ts": "never"
       }
     ],
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": ["hardhat.config.ts", "test/**/*", "deploy/**/*"]}],
     "import/prefer-default-export": "off",
     "prefer-destructuring": "off",
     "prefer-template": "off",

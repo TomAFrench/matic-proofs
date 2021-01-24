@@ -2,6 +2,7 @@ import { BigNumberish } from "@ethersproject/bignumber";
 import { TransactionReceipt } from "@ethersproject/providers";
 
 export interface RequiredBlockMembers {
+  hash: string;
   difficulty: string;
   number: string;
   receiptsRoot: string;
@@ -19,9 +20,9 @@ export type HeaderBlockCheckpoint = {
 };
 
 export type ReceiptMPProof = {
-  parentNodes: Buffer[];
-  root: Buffer;
-  path: Buffer;
+  parentNodes: string[];
+  root: string;
+  path: string;
 };
 
 export interface BlockProof {
@@ -46,8 +47,8 @@ export interface ExitProof {
   burnTxBlockTimestamp: number;
   transactionsRoot: string;
   receiptsRoot: string;
-  receipt: Buffer;
-  receiptProofParentNodes: Buffer[];
-  receiptProofPath: Buffer;
+  receipt: TransactionReceipt;
+  receiptProofParentNodes: string[];
+  receiptProofPath: string;
   logIndex: number;
 }
