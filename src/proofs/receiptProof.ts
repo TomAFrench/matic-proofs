@@ -42,16 +42,15 @@ export const getReceiptBytes = (receipt: TransactionReceipt): string => {
 
 const buildReceiptTrie = async (receipts: TransactionReceipt[], blockNumber: string, blockHash: string) => {
   const receiptsTrie = new BaseTrie();
-
   const stateSyncHash = getStateSyncTxHash(blockNumber, blockHash);
 
   // Add all receipts to the trie
   for (let i = 0; i < receipts.length; i += 1) {
-    const siblingReceipt = receipts[i];
+    const receipt = receipts[i];
     // Ignore any state sync receipts as they do not get included in trie
-    if (siblingReceipt.transactionHash !== stateSyncHash) {
-      const key = encode(hexlify(siblingReceipt.transactionIndex));
-      const rawReceipt = getReceiptBytes(siblingReceipt);
+    if (receipt.transactionHash !== stateSyncHash) {
+      const key = encode(hexlify(receipt.transactionIndex));
+      const rawReceipt = getReceiptBytes(receipt);
       // eslint-disable-next-line no-await-in-loop
       await receiptsTrie.put(hexToBuffer(key), hexToBuffer(rawReceipt));
     }
