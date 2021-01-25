@@ -2,9 +2,9 @@ pragma solidity 0.6.6;
 
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
 import {ICheckpointManager} from "./interfaces/ICheckpointManager.sol";
-import {RLPReader} from "./lib/RLPReader.sol";
-import {MerklePatriciaProof} from "./lib/MerklePatriciaProof.sol";
-import {Merkle} from "./lib/Merkle.sol";
+import {RLPReader} from "./libraries/RLPReader.sol";
+import {MerklePatriciaProof} from "./libraries/MerklePatriciaProof.sol";
+import {Merkle} from "./libraries/Merkle.sol";
 
 contract ProofVerifier {
     using RLPReader for bytes;

@@ -1,6 +1,6 @@
 pragma solidity 0.6.6;
 
-import {MerklePatriciaProof} from "../lib/MerklePatriciaProof.sol";
+import {MerklePatriciaProof} from "../libraries/MerklePatriciaProof.sol";
 
 contract TestMerklePatriciaProof {
     function verify(
@@ -8,7 +8,7 @@ contract TestMerklePatriciaProof {
         bytes memory encodedPath,
         bytes memory rlpParentNodes,
         bytes32 root
-    ) public view returns (bool) {
+    ) public pure returns (bool) {
         return MerklePatriciaProof.verify(value, encodedPath, rlpParentNodes, root);       
     }
 }

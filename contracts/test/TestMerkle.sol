@@ -1,6 +1,6 @@
 pragma solidity 0.6.6;
 
-import {Merkle} from "../lib/Merkle.sol";
+import {Merkle} from "../libraries/Merkle.sol";
 
 contract TestMerkle {
     function checkMembership(
