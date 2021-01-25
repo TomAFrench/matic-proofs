@@ -7,7 +7,7 @@
   "scripts": {
     "compile": "hardhat compile",
     "clean": "shx rm -rf ./lib",
-    "test": "jest",
+    "test": "hardhat test",
     "build": "yarn clean && tsc -p tsconfig.production.json",
     "lint": "eslint src/**/*.ts test/**/*.ts"
   },
@@ -25,6 +25,7 @@
     "mnemonics": "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
   },
   "devDependencies": {
+    "@ethereum-waffle/chai": "^3.2.2",
     "@ethersproject/abi": "^5.0.5",
     "@ethersproject/bignumber": "^5.0.7",
     "@ethersproject/bytes": "^5.0.9",
@@ -35,7 +36,9 @@
     "@ethersproject/solidity": "^5.0.5",
     "@openzeppelin/contracts": "3.1.0",
     "@types/bluebird": "^3.5.32",
-    "@types/jest": "^26.0.20",
+    "@types/chai": "^4.2.14",
+    "@types/mocha": "^8.2.0",
+    "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-typescript-prettier": "^3.1.0",
     "eth-json-rpc-filters": "^4.1.1",
@@ -43,7 +46,7 @@
     "hardhat": "^2.0.8",
     "hardhat-deploy": "^0.7.0-beta.44",
     "hardhat-deploy-ethers": "^0.3.0-beta.7",
-    "jest": "^26.6.3",
+    "mocha": "^8.2.1",
     "prettier": "^2.1.2",
     "shx": "^0.3.2",
     "ts-jest": "^26.4.4",

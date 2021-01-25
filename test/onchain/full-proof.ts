@@ -8,10 +8,13 @@ import { buildMerklePatriciaProof } from "../../src/proofs/receiptProof";
 import { ExitProof } from "../../src/types";
 import { getLogIndex } from "../../src/utils/logIndex";
 import { block, blocks, CHECKPOINT, CHECKPOINT_ID, receipt, receipts } from "../mockResponses";
+import chai from "../chai-setup";
+
+const { expect } = chai;
 
 export function testFullProof(): void {
   let proofVerifier: Contract;
-  beforeAll(async function () {
+  before(async function () {
     await deployments.fixture("ProofVerifier");
     const checkpointManager = await ethers.getContract("MockCheckpointManager");
     await checkpointManager.setCheckpoint(CHECKPOINT.root, CHECKPOINT.start, CHECKPOINT.end);
@@ -37,6 +40,6 @@ export function testFullProof(): void {
     };
 
     const proofPayload = encodePayload(exitProof);
-    expect(await proofVerifier.exit(proofPayload)).toBe(true);
+    expect(await proofVerifier.exit(proofPayload)).to.eq(true);
   });
 }
