@@ -1,16 +1,13 @@
 /* eslint-disable func-names */
 import { TransactionReceipt } from "@ethersproject/providers";
 import { BaseTrie } from "merkle-patricia-tree";
-import { BigNumber } from "@ethersproject/bignumber";
-import { arrayify } from "@ethersproject/bytes";
+import { hexlify } from "@ethersproject/bytes";
 import { encode } from "@ethersproject/rlp";
 import { bufferToHex } from "ethereumjs-util";
-import block from "../mockResponses/347-block.json";
-import receiptList from "../mockResponses/347-receipt-list.json";
+
 import { buildMerklePatriciaProof, getReceiptBytes } from "../../src/proofs/receiptProof";
 import { hexToBuffer } from "../../src/utils/buffer";
-
-const receipts = (receiptList as unknown) as TransactionReceipt[];
+import { block, receipts } from "../mockResponses";
 
 export function testBuildMerklePatriciaProof(): void {
   it("produces a trie which matches block's receipt root", async () => {
@@ -19,19 +16,19 @@ export function testBuildMerklePatriciaProof(): void {
     expect(receiptProof.root).toBe(block.receiptsRoot);
   });
 
-  it.skip.each(receipts.slice(0, 1))("should generate a valid proof", async (receipt: TransactionReceipt) => {
+  it.each(receipts.slice(0, 1))("should generate a valid proof", async (receipt: TransactionReceipt) => {
     const receiptProof = await buildMerklePatriciaProof(receipt, receipts, block.number.toString(), block.hash);
 
     const receiptBytes = await BaseTrie.verifyProof(
       hexToBuffer(receiptProof.root),
-      hexToBuffer(encode(arrayify(receipt.transactionIndex))),
+      hexToBuffer(encode(hexlify(receipt.transactionIndex))),
       receiptProof.parentNodes.map(hexToBuffer),
     );
 
     expect(receiptBytes).not.toBeNull();
 
     const actualReceiptHex = bufferToHex(receiptBytes as Buffer);
-    const expectedReceiptHex = BigNumber.from(getReceiptBytes(receipt)).toHexString();
+    const expectedReceiptHex = getReceiptBytes(receipt);
     expect(actualReceiptHex).toBe(expectedReceiptHex);
 
     process.stdout.write(`\r      Proof verified for receipt ${receipt.transactionIndex}`);

@@ -8,15 +8,15 @@ import { testFullProof as testFullProofOnchain } from "./onchain/full-proof";
 
 describe("Unit tests", function () {
   describe("Javascript checks", function () {
-    describe.only("buildMerkleProof", function () {
+    describe("buildMerkleProof", function () {
       testBuildMerkleProofOffchain();
     });
 
-    describe.only("buildMerklePatriciaProof", function () {
+    describe("buildMerklePatriciaProof", function () {
       testBuildMerklePatriciaProofOffchain();
     });
 
-    describe("buildFullProof", function () {
+    describe.skip("buildFullProof", function () {
       testFullProofOffChain();
     });
   });
@@ -26,11 +26,11 @@ describe("Unit tests", function () {
       testBuildMerkleProofOnchain();
     });
 
-    describe.only("buildMerklePatriciaProof", function () {
+    describe("buildMerklePatriciaProof", function () {
       testBuildMerklePatriciaProofOnchain();
     });
 
-    describe("buildFullProof", function () {
+    describe.skip("buildFullProof", function () {
       testFullProofOnchain();
     });
   });

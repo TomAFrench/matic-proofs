@@ -4,11 +4,8 @@ import { TransactionReceipt } from "@ethersproject/providers";
 import { hexConcat, hexlify } from "@ethersproject/bytes";
 import { Contract } from "@ethersproject/contracts";
 import { encode } from "@ethersproject/rlp";
-import block from "../mockResponses/347-block.json";
-import receiptList from "../mockResponses/347-receipt-list.json";
 import { buildMerklePatriciaProof, getReceiptBytes } from "../../src/proofs/receiptProof";
-
-const receipts = (receiptList as unknown) as TransactionReceipt[];
+import { block, receipts } from "../mockResponses";
 
 // eslint-disable-next-line func-names
 export function testBuildMerklePatriciaProof(): void {
