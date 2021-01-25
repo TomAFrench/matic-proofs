@@ -28,7 +28,8 @@ const getStateSyncTxHash = (blockNumber: string, blockHash: string): string =>
 
 export const getReceiptBytes = (receipt: TransactionReceipt): string => {
   return encode([
-    receipt.status ? "0x01" : "0x00",
+    // eslint-disable-next-line no-nested-ternary
+    receipt.status !== undefined && receipt.status !== null ? (receipt.status ? "0x01" : "0x") : receipt.root,
     hexlify(receipt.cumulativeGasUsed),
     receipt.logsBloom,
 
