@@ -9,3 +9,6 @@ build
 # flat
 
 lib/
+artifacts/
+cache/
+*.log
