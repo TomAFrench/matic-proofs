@@ -1,8 +1,8 @@
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { keccak256 as solidityKeccak256 } from "@ethersproject/solidity";
-import { bufferToHex } from "ethereumjs-util";
 
+import { hexConcat } from "@ethersproject/bytes";
 import { buildMerklePatriciaProof } from "./proofs/receiptProof";
 import { getFullBlockByHash } from "./utils/blocks";
 import { getLogIndex } from "./utils/logIndex";
@@ -24,15 +24,15 @@ const calculateExitHash = async (
   const receipts = await Promise.all(burnTxBlock.transactions.map(tx => maticChainProvider.getTransactionReceipt(tx)));
   const { path } = await buildMerklePatriciaProof(burnTxReceipt, receipts, burnTxBlock.number, burnTxBlock.hash);
 
-  const nibbleArray: Buffer[] = [];
+  const nibbleArray: string[] = [];
   // RootChain.sol drops first byte (2 nibbles) from nibble array when calculating nibbleArray
   hexToBuffer(path)
     .slice(1)
     .forEach(byte => {
-      nibbleArray.push(Buffer.from("0" + (byte / 0x10).toString(16), "hex"));
-      nibbleArray.push(Buffer.from("0" + (byte % 0x10).toString(16), "hex"));
+      nibbleArray.push("0x0" + (byte / 0x10).toString(16));
+      nibbleArray.push("0x0" + (byte % 0x10).toString(16));
     });
-  const nibblesHex = bufferToHex(Buffer.concat(nibbleArray));
+  const nibblesHex = hexConcat(nibbleArray);
 
   const logIndex = getLogIndex(burnTxReceipt, logEventSig);
   const exitHash = solidityKeccak256(
