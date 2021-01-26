@@ -67,15 +67,10 @@ export const buildMerklePatriciaProof = async (
 ): Promise<ReceiptMPProof> => {
   const receiptsTrie = await buildReceiptTrie(receipts, blockNumber, blockHash);
   const key = encode(hexlify(receipt.transactionIndex));
-  const { node, remaining, stack } = await receiptsTrie.findPath(hexToBuffer(key));
-
-  if (node === null || remaining.length > 0) {
-    throw new Error("Node does not contain the key");
-  }
-  // console.log("stack", stack);
+  const proof = await BaseTrie.createProof(receiptsTrie, hexToBuffer(key));
 
   return {
-    parentNodes: stack.map(stackElem => bufferToHex(stackElem.serialize())),
+    parentNodes: proof.map(bufferToHex),
     root: bufferToHex(receiptsTrie.root),
     path: hexConcat(["0x00", hexlify(receipt.transactionIndex)]),
   };
