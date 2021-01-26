@@ -13,7 +13,7 @@ import { hexToBuffer } from "./utils/buffer";
 const calculateExitHash = async (
   maticChainProvider: JsonRpcProvider,
   burnTxHash: string,
-  logEventSig: string,
+  logEventSigOrIndex: string | number,
 ): Promise<string> => {
   const burnTxReceipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
   if (typeof burnTxReceipt.blockNumber === "undefined") {
@@ -34,7 +34,11 @@ const calculateExitHash = async (
     });
   const nibblesHex = hexConcat(nibbleArray);
 
-  const logIndex = getLogIndex(burnTxReceipt, logEventSig);
+  // If user has provided a string, find index of the first matching withdraw event in the receipt.
+  // If user has provided a number, take this as the index of the desired withdrawal event.
+  // This is necessary as a transaction can have multiple withdrawals.
+  const logIndex =
+    typeof logEventSigOrIndex === "string" ? getLogIndex(burnTxReceipt, logEventSigOrIndex) : logEventSigOrIndex;
   const exitHash = solidityKeccak256(
     ["uint256", "bytes", "uint256"],
     [burnTxReceipt.blockNumber, nibblesHex, logIndex],
