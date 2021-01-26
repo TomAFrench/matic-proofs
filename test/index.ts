@@ -16,7 +16,7 @@ describe("Unit tests", function () {
       testBuildMerklePatriciaProofOffchain();
     });
 
-    describe.skip("buildFullProof", function () {
+    describe("buildFullProof", function () {
       testFullProofOffChain();
     });
   });
@@ -30,7 +30,7 @@ describe("Unit tests", function () {
       testBuildMerklePatriciaProofOnchain();
     });
 
-    describe.skip("buildFullProof", function () {
+    describe("buildFullProof", function () {
       testFullProofOnchain();
     });
   });

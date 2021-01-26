@@ -1,10 +1,11 @@
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
-import { encode } from "@ethersproject/rlp";
 import { hexConcat, hexlify } from "@ethersproject/bytes";
+import { bufferToHex, rlp } from "ethereumjs-util";
 import { ExitProof } from "./types";
 import { buildBlockProof } from "./proofs/blockProof";
 import { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
 import { getLogIndex } from "./utils/logIndex";
+import { hexToBuffer } from "./utils/buffer";
 
 export { buildBlockProof } from "./proofs/blockProof";
 export { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
@@ -26,19 +27,24 @@ export const encodePayload = ({
   receiptProofParentNodes,
   receiptProofPath,
   logIndex,
-}: ExitProof): string =>
-  encode([
-    hexlify(headerBlockNumber),
-    hexConcat(blockProof),
-    hexlify(burnTxBlockNumber),
-    hexlify(burnTxBlockTimestamp),
-    transactionsRoot,
-    receiptsRoot,
-    getReceiptBytes(receipt),
-    encode(receiptProofParentNodes),
-    receiptProofPath,
-    hexlify(logIndex),
-  ]);
+}: ExitProof): string => {
+  return bufferToHex(
+    rlp.encode([
+      headerBlockNumber,
+      hexConcat(blockProof),
+      burnTxBlockNumber,
+      burnTxBlockTimestamp,
+      transactionsRoot,
+      receiptsRoot,
+      getReceiptBytes(receipt),
+      // Each node in proof has been RLP encoded when serialised
+      // so we need to decode each individually and reencode the proof as a whole
+      rlp.encode(receiptProofParentNodes.map(node => rlp.decode(hexToBuffer(node)))),
+      receiptProofPath,
+      logIndex,
+    ]),
+  );
+};
 
 export const buildPayloadForExit = async (
   rootChainProvider: Provider,

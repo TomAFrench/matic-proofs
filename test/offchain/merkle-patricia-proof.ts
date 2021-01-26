@@ -1,8 +1,6 @@
 /* eslint-disable func-names */
 import { BaseTrie } from "merkle-patricia-tree";
-import { hexlify } from "@ethersproject/bytes";
-import { encode } from "@ethersproject/rlp";
-import { bufferToHex } from "ethereumjs-util";
+import { bufferToHex, rlp } from "ethereumjs-util";
 
 import { buildMerklePatriciaProof, getReceiptBytes } from "../../src/proofs/receiptProof";
 import { hexToBuffer } from "../../src/utils/buffer";
@@ -13,14 +11,14 @@ import { referenceReceiptBytesImplementation } from "../utils/getReceiptBytes";
 const { expect } = chai;
 
 export function testBuildMerklePatriciaProof(): void {
-  it("correctly calculates the receiptBytes", () => {
+  it("correctly calculates the receipt's value", () => {
     const expectedReceiptHex = bufferToHex(referenceReceiptBytesImplementation(receipt));
     const actualReceiptHex = getReceiptBytes(receipt);
     expect(actualReceiptHex).to.eq(expectedReceiptHex);
   });
 
   it("produces a trie which matches block's receipt root", async () => {
-    const receiptProof = await buildMerklePatriciaProof(receipts[0], receipts, block.number.toString(), block.hash);
+    const receiptProof = await buildMerklePatriciaProof(receipt, receipts, block.number.toString(), block.hash);
 
     expect(receiptProof.root).to.eq(block.receiptsRoot);
   });
@@ -30,7 +28,7 @@ export function testBuildMerklePatriciaProof(): void {
 
     const receiptBytes = await BaseTrie.verifyProof(
       hexToBuffer(receiptProof.root),
-      hexToBuffer(encode(hexlify(receipt.transactionIndex))),
+      rlp.encode(receipt.transactionIndex),
       receiptProof.parentNodes.map(hexToBuffer),
     );
 

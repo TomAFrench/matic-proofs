@@ -1,11 +1,12 @@
 /* eslint-disable func-names */
 import { deployments, ethers } from "hardhat";
-import { hexConcat, hexlify } from "@ethersproject/bytes";
+import { hexConcat } from "@ethersproject/bytes";
 import { Contract } from "@ethersproject/contracts";
-import { encode } from "@ethersproject/rlp";
+import { bufferToHex, rlp } from "ethereumjs-util";
 import { buildMerklePatriciaProof, getReceiptBytes } from "../../src/proofs/receiptProof";
 import { block, receipt, receipts } from "../mockResponses";
 import chai from "../chai-setup";
+import { hexToBuffer } from "../../src/utils/buffer";
 
 const { expect } = chai;
 
@@ -19,8 +20,9 @@ export function testBuildMerklePatriciaProof(): void {
 
   it("should generate a valid proof", async () => {
     const receiptProof = await buildMerklePatriciaProof(receipt, receipts, block.number.toString(), block.hash);
-    const key = hexConcat(["0x00", hexlify(receipt.transactionIndex)]);
-    const rlpParentNodes = encode(receiptProof.parentNodes);
-    expect(await merklePatricia.verify(getReceiptBytes(receipt), key, rlpParentNodes, receiptProof.root)).to.eq(true);
+    const path = hexConcat(["0x00", bufferToHex(rlp.encode(receipt.transactionIndex))]);
+    const rlpParentNodes = bufferToHex(rlp.encode(receiptProof.parentNodes.map(node => rlp.decode(hexToBuffer(node)))));
+
+    expect(await merklePatricia.verify(getReceiptBytes(receipt), path, rlpParentNodes, receiptProof.root)).to.eq(true);
   });
 }

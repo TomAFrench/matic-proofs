@@ -2,7 +2,7 @@ import { JsonRpcProvider, TransactionReceipt } from "@ethersproject/providers";
 import { BaseTrie } from "merkle-patricia-tree";
 import { hexConcat, hexlify, hexZeroPad } from "@ethersproject/bytes";
 import { encode } from "@ethersproject/rlp";
-import { bufferToHex } from "ethereumjs-util";
+import { bufferToHex, rlp } from "ethereumjs-util";
 import { keccak256 } from "@ethersproject/solidity";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ReceiptMPProof, ReceiptProof } from "../types";
@@ -50,10 +50,10 @@ const buildReceiptTrie = async (receipts: TransactionReceipt[], blockNumber: str
     const receipt = receipts[i];
     // Ignore any state sync receipts as they do not get included in trie
     if (receipt.transactionHash !== stateSyncHash) {
-      const key = encode(hexlify(receipt.transactionIndex));
+      const key = rlp.encode(receipt.transactionIndex);
       const rawReceipt = getReceiptBytes(receipt);
       // eslint-disable-next-line no-await-in-loop
-      await receiptsTrie.put(hexToBuffer(key), hexToBuffer(rawReceipt));
+      await receiptsTrie.put(key, hexToBuffer(rawReceipt));
     }
   }
   return receiptsTrie;
@@ -66,13 +66,13 @@ export const buildMerklePatriciaProof = async (
   blockHash: string,
 ): Promise<ReceiptMPProof> => {
   const receiptsTrie = await buildReceiptTrie(receipts, blockNumber, blockHash);
-  const key = encode(hexlify(receipt.transactionIndex));
-  const proof = await BaseTrie.createProof(receiptsTrie, hexToBuffer(key));
+  const key = rlp.encode(receipt.transactionIndex);
+  const proof = await BaseTrie.createProof(receiptsTrie, key);
 
   return {
     parentNodes: proof.map(bufferToHex),
     root: bufferToHex(receiptsTrie.root),
-    path: hexConcat(["0x00", hexlify(receipt.transactionIndex)]),
+    path: hexConcat(["0x00", bufferToHex(key)]),
   };
 };
 
