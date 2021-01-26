@@ -8,10 +8,17 @@ import { buildMerklePatriciaProof, getReceiptBytes } from "../../src/proofs/rece
 import { hexToBuffer } from "../../src/utils/buffer";
 import { block, receipt, receipts } from "../mockResponses";
 import chai from "../chai-setup";
+import { referenceReceiptBytesImplementation } from "../utils/getReceiptBytes";
 
 const { expect } = chai;
 
 export function testBuildMerklePatriciaProof(): void {
+  it("correctly calculates the receiptBytes", () => {
+    const expectedReceiptHex = bufferToHex(referenceReceiptBytesImplementation(receipt));
+    const actualReceiptHex = getReceiptBytes(receipt);
+    expect(actualReceiptHex).to.eq(expectedReceiptHex);
+  });
+
   it("produces a trie which matches block's receipt root", async () => {
     const receiptProof = await buildMerklePatriciaProof(receipts[0], receipts, block.number.toString(), block.hash);
 
