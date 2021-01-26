@@ -12,7 +12,7 @@ contract MockCheckpointManager is ICheckpointManager {
     uint256 constant CHECKPOINT_ID_INTERVAL = 10000;
     uint256 public currentCheckpointNumber = 0;
 
-    function setCheckpoint(bytes32 rootHash, uint256 start, uint256 end) public {
+    function setCheckpoint(uint256 checkpointId, bytes32 rootHash, uint256 start, uint256 end) public {
         HeaderBlock memory headerBlock = HeaderBlock({
             root: rootHash,
             start: start,
@@ -21,7 +21,7 @@ contract MockCheckpointManager is ICheckpointManager {
             proposer: msg.sender
         });
 
-        currentCheckpointNumber = currentCheckpointNumber.add(CHECKPOINT_ID_INTERVAL);
-        headerBlocks[currentCheckpointNumber] = headerBlock;
+        currentCheckpointNumber = checkpointId.add(CHECKPOINT_ID_INTERVAL);
+        headerBlocks[checkpointId] = headerBlock;
     }
 }

@@ -17,7 +17,7 @@ export function testFullProof(): void {
   before(async function () {
     await deployments.fixture("ProofVerifier");
     const checkpointManager = await ethers.getContract("MockCheckpointManager");
-    await checkpointManager.setCheckpoint(CHECKPOINT.root, CHECKPOINT.start, CHECKPOINT.end);
+    await checkpointManager.setCheckpoint(CHECKPOINT_ID, CHECKPOINT.root, CHECKPOINT.start, CHECKPOINT.end);
     proofVerifier = await ethers.getContract("ProofVerifier");
   });
 
