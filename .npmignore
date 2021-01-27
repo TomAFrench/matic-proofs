@@ -1,5 +1,11 @@
 #folders
+.circleci
+artifacts
+cache
+contracts
+deploy
 src
+test
 
 #files
 .commitlintrc.js
@@ -9,8 +15,10 @@ src
 .gitattributes
 .gitignore
 .lintstagedrc.js
+.mocharc.json
 .nvmrc
 .prettierrc
+hardhat.config.ts
 tsconfig.json
 tsconfig.production.json
 yarn.lock
