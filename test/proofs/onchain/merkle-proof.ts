@@ -3,9 +3,9 @@ import { deployments, ethers } from "hardhat";
 import { BigNumber } from "@ethersproject/bignumber";
 import { Contract } from "@ethersproject/contracts";
 import { hexConcat } from "@ethersproject/bytes";
-import { buildMerkleProof, getBlockHeader } from "../../src/proofs/blockProof";
-import { block, blocks, CHECKPOINT, CHECKPOINT_ID } from "../mockResponses";
-import chai from "../chai-setup";
+import { buildMerkleProof, getBlockHeader } from "../../../src/proofs/blockProof";
+import { block, blocks, CHECKPOINT, CHECKPOINT_ID } from "../../mockResponses";
+import chai from "../../chai-setup";
 
 const { expect } = chai;
 

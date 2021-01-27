@@ -2,11 +2,11 @@
 import { BaseTrie } from "merkle-patricia-tree";
 import { bufferToHex, rlp } from "ethereumjs-util";
 
-import { buildMerklePatriciaProof, getReceiptBytes } from "../../src/proofs/receiptProof";
-import { hexToBuffer } from "../../src/utils/buffer";
-import { block, receipt, receipts } from "../mockResponses";
-import chai from "../chai-setup";
-import { referenceReceiptBytesImplementation } from "../utils/getReceiptBytes";
+import { buildMerklePatriciaProof, getReceiptBytes } from "../../../src/proofs/receiptProof";
+import { hexToBuffer } from "../../../src/utils/buffer";
+import { block, receipt, receipts } from "../../mockResponses";
+import chai from "../../chai-setup";
+import { referenceReceiptBytesImplementation } from "../../utils/getReceiptBytes";
 
 const { expect } = chai;
 

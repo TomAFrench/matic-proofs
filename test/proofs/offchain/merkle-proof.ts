@@ -1,9 +1,9 @@
 /* eslint-disable func-names */
 import { BigNumber } from "@ethersproject/bignumber";
-import MerkleTree from "../../src/utils/merkleTree";
-import { buildMerkleProof, getBlockHeader } from "../../src/proofs/blockProof";
-import { blocks, CHECKPOINT, CHECKPOINT_ID } from "../mockResponses";
-import chai from "../chai-setup";
+import MerkleTree from "../../../src/utils/merkleTree";
+import { buildMerkleProof, getBlockHeader } from "../../../src/proofs/blockProof";
+import { blocks, CHECKPOINT, CHECKPOINT_ID } from "../../mockResponses";
+import chai from "../../chai-setup";
 
 const { expect } = chai;
 
