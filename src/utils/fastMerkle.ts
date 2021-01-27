@@ -12,6 +12,19 @@ const recursiveZeroHash = (n: number): string => {
   return solidityKeccak256(["bytes32", "bytes32"], [subHash, subHash]);
 };
 
+/**
+ * Function to quickly calculate a merkle proof of block inclusion in a checkpoint
+ * Makes use of the `eth_getRootHash` method on Matic nodes to reduce number of requests
+ * @dev Starts from the top of the merkle tree and determines which subtree the leaf of interest is in.
+ *      The root hash of the other subtree is then requested and the process repeats on the new root node
+ *
+ *      When pulling merkle roots on the right side of the tree, care must be taken to ensure that the proper padding
+ *      with zero leaves is performed as the Matic node does not know that this is part of a subtree
+ * @param maticProvider - the provider from which to query merkle roots
+ * @param blockNumber - the blocknumber of the block for which to generate a merkle proof
+ * @param startBlock - the blocknumber of the first block in the checkpoint
+ * @param endBlock - the blocknumber of the last block in the checkpoint
+ */
 export const getFastMerkleProof = async (
   maticProvider: JsonRpcProvider,
   blockNumber: number,
