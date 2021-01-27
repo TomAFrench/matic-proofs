@@ -3,10 +3,10 @@ import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 
 const checkBlockInCheckpoint = async (
   checkpointManager: Contract,
-  targetBlockNumber: BigNumberish,
+  targetBlockNumber: BigNumber,
   checkpointId: BigNumber,
 ) => {
-  const headerBlock = await checkpointManager.headerBlocks(checkpointId.toString());
+  const headerBlock = await checkpointManager.headerBlocks(checkpointId);
   const headerStart = BigNumber.from(headerBlock.start);
   const headerEnd = BigNumber.from(headerBlock.end);
 
@@ -55,8 +55,8 @@ export const findBlockCheckpointId = async (
     // eslint-disable-next-line no-await-in-loop
     const checkpointStatus = await checkBlockInCheckpoint(
       checkpointManager,
-      mid.mul(checkpointIdInterval).toString(),
       childBlockNumber,
+      mid.mul(checkpointIdInterval),
     );
 
     switch (checkpointStatus) {
