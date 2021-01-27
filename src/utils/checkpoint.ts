@@ -38,6 +38,12 @@ export const findBlockCheckpointId = async (
   // first checkpoint id = start * 10000
   let start = BigNumber.from(1);
 
+  // Shortcut: If block is newer than last checkpoint of 2020 then bring forward start to then
+  // Shaves off a couple of seconds for recent withdrawals
+  if (childBlockNumber.gte(9010326)) {
+    start = BigNumber.from(91490000).div(checkpointIdInterval);
+  }
+
   // last checkpoint id = end * 10000
   const latestCheckpointId = await checkpointManager.currentHeaderBlock();
   let end = BigNumber.from(latestCheckpointId).div(checkpointIdInterval);
