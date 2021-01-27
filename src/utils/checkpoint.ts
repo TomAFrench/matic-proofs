@@ -3,10 +3,10 @@ import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 
 const checkBlockInCheckpoint = async (
   checkpointManager: Contract,
-  targetBlockNumber: BigNumberish,
+  targetBlockNumber: BigNumber,
   checkpointId: BigNumber,
 ) => {
-  const headerBlock = await checkpointManager.headerBlocks(checkpointId.toString());
+  const headerBlock = await checkpointManager.headerBlocks(checkpointId);
   const headerStart = BigNumber.from(headerBlock.start);
   const headerEnd = BigNumber.from(headerBlock.end);
 
@@ -38,8 +38,15 @@ export const findBlockCheckpointId = async (
   // first checkpoint id = start * 10000
   let start = BigNumber.from(1);
 
+  // Shortcut: If block is newer than last checkpoint of 2020 then bring forward start to then
+  // Shaves off a couple of seconds for recent withdrawals
+  if (childBlockNumber.gte(9010326)) {
+    start = BigNumber.from(91490000).div(checkpointIdInterval);
+  }
+
   // last checkpoint id = end * 10000
-  let end = BigNumber.from(await checkpointManager.currentHeaderBlock()).div(checkpointIdInterval);
+  const latestCheckpointId = await checkpointManager.currentHeaderBlock();
+  let end = BigNumber.from(latestCheckpointId).div(checkpointIdInterval);
   if (start.gt(end)) {
     throw new Error("start block is greater than end block");
   }
@@ -55,8 +62,8 @@ export const findBlockCheckpointId = async (
     // eslint-disable-next-line no-await-in-loop
     const checkpointStatus = await checkBlockInCheckpoint(
       checkpointManager,
-      mid.mul(checkpointIdInterval).toString(),
       childBlockNumber,
+      mid.mul(checkpointIdInterval),
     );
 
     switch (checkpointStatus) {

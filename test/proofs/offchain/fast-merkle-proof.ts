@@ -1,10 +1,10 @@
 /* eslint-disable func-names */
 import { BigNumber } from "@ethersproject/bignumber";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { buildMerkleProof } from "../../src/proofs/blockProof";
-import { blocks, CHECKPOINT, CHECKPOINT_ID } from "../mockResponses";
-import chai from "../chai-setup";
-import { getFastMerkleProof } from "../../src/utils/fastMerkle";
+import { buildMerkleProof } from "../../../src/proofs/blockProof";
+import { blocks, CHECKPOINT, CHECKPOINT_ID } from "../../mockResponses";
+import chai from "../../chai-setup";
+import { getFastMerkleProof } from "../../../src/utils/fastMerkle";
 
 const { expect } = chai;
 
@@ -35,9 +35,6 @@ export function testFastMerkleProof(): void {
         BigNumber.from(CHECKPOINT.start).toNumber(),
         BigNumber.from(CHECKPOINT.end).toNumber(),
       );
-
-      // console.log("Fast", fastMerkle);
-      // console.log("Slow", blockProof.blockProof);
 
       expect(fastMerkle.length).to.eq(blockProof.blockProof.length);
       fastMerkle.forEach((hash, index) => {

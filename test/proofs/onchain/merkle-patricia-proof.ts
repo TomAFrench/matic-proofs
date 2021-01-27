@@ -3,10 +3,10 @@ import { deployments, ethers } from "hardhat";
 import { hexConcat } from "@ethersproject/bytes";
 import { Contract } from "@ethersproject/contracts";
 import { bufferToHex, rlp } from "ethereumjs-util";
-import { buildMerklePatriciaProof, getReceiptBytes } from "../../src/proofs/receiptProof";
-import { block, receipt, receipts } from "../mockResponses";
-import chai from "../chai-setup";
-import { hexToBuffer } from "../../src/utils/buffer";
+import { buildMerklePatriciaProof, getReceiptBytes } from "../../../src/proofs/receiptProof";
+import { block, receipt, receipts } from "../../mockResponses";
+import chai from "../../chai-setup";
+import { hexToBuffer } from "../../../src/utils/buffer";
 
 const { expect } = chai;
 

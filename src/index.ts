@@ -1,5 +1,5 @@
 import { JsonRpcProvider, Provider } from "@ethersproject/providers";
-import { hexConcat, hexlify } from "@ethersproject/bytes";
+import { hexConcat } from "@ethersproject/bytes";
 import { bufferToHex, rlp } from "ethereumjs-util";
 import { ExitProof } from "./types";
 import { buildBlockProof } from "./proofs/blockProof";

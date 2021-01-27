@@ -1,11 +1,11 @@
 /* eslint-disable func-names */
-import { encodePayload, ERC20_TRANSFER_EVENT_SIG } from "../../src";
-import { buildMerkleProof } from "../../src/proofs/blockProof";
-import { buildMerklePatriciaProof } from "../../src/proofs/receiptProof";
-import { ExitProof } from "../../src/types";
-import { getLogIndex } from "../../src/utils/logIndex";
-import { block, blocks, CHECKPOINT_ID, receipt, receipts } from "../mockResponses";
-import chai from "../chai-setup";
+import { encodePayload, ERC20_TRANSFER_EVENT_SIG } from "../../../src";
+import { buildMerkleProof } from "../../../src/proofs/blockProof";
+import { buildMerklePatriciaProof } from "../../../src/proofs/receiptProof";
+import { ExitProof } from "../../../src/types";
+import { getLogIndex } from "../../../src/utils/logIndex";
+import { block, blocks, CHECKPOINT_ID, receipt, receipts } from "../../mockResponses";
+import chai from "../../chai-setup";
 
 const { expect } = chai;
 
