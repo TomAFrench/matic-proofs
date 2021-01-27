@@ -39,7 +39,8 @@ export const findBlockCheckpointId = async (
   let start = BigNumber.from(1);
 
   // last checkpoint id = end * 10000
-  let end = BigNumber.from(await checkpointManager.currentHeaderBlock()).div(checkpointIdInterval);
+  const latestCheckpointId = await checkpointManager.currentHeaderBlock();
+  let end = BigNumber.from(latestCheckpointId).div(checkpointIdInterval);
   if (start.gt(end)) {
     throw new Error("start block is greater than end block");
   }
