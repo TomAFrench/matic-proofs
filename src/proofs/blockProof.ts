@@ -6,7 +6,8 @@ import { BlockProof, HeaderBlockCheckpoint, RequiredBlockMembers } from "../type
 import { findBlockCheckpointId } from "../utils/checkpoint";
 import { isBlockCheckpointed } from "../checks";
 import { getCheckpointManager } from "../utils/contracts";
-import { getBlocksInRange } from "../utils/blocks";
+import { getFullBlockByNumber } from "../utils/blocks";
+import { getFastMerkleProof } from "../utils/fastMerkle";
 
 export const getBlockHeader = (block: RequiredBlockMembers): string =>
   solidityKeccak256(
@@ -52,7 +53,21 @@ export const buildBlockProof = async (
 
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
-  const blocks = await getBlocksInRange(maticChainProvider, startBlock, endBlock);
-  const burnTxBlock = blocks[BigNumber.from(blockNumber).sub(startBlock).toNumber()];
-  return buildMerkleProof(burnTxBlock, blocks, checkpointId);
+  const burnTxBlock = await getFullBlockByNumber(maticChainProvider, blockNumber);
+  const merkleProof = await getFastMerkleProof(
+    maticChainProvider,
+    BigNumber.from(blockNumber).toNumber(),
+    startBlock,
+    endBlock,
+  );
+
+  const blockProof = {
+    burnTxBlockNumber: BigNumber.from(burnTxBlock.number).toNumber(),
+    burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),
+    transactionsRoot: burnTxBlock.transactionsRoot,
+    receiptsRoot: burnTxBlock.receiptsRoot,
+    headerBlockNumber: checkpointId.toNumber(),
+    blockProof: merkleProof,
+  };
+  return blockProof;
 };
