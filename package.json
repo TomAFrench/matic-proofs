@@ -21,9 +21,6 @@
     "url": "https://github.com/TomAFrench/matic-proofs/issues"
   },
   "homepage": "https://github.com/TomAFrench/matic-proofs#readme",
-  "config": {
-    "mnemonics": "clock radar mass judge dismiss just intact mind resemble fringe diary casino"
-  },
   "devDependencies": {
     "@ethereum-waffle/chai": "^3.2.2",
     "@ethersproject/abi": "^5.0.5",
