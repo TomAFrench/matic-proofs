@@ -29,7 +29,7 @@ export const calculateExitHash = async (
   hexToBuffer(path)
     .slice(1)
     .forEach(byte => {
-      nibbleArray.push("0x0" + (byte / 0x10).toString(16));
+      nibbleArray.push("0x0" + Math.floor(byte / 0x10).toString(16));
       nibbleArray.push("0x0" + (byte % 0x10).toString(16));
     });
   const nibblesHex = hexConcat(nibbleArray);
