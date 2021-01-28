@@ -11,6 +11,7 @@ const testData: [number, number][] = [
   [8689955, 88920000],
   [8657042, 88660000],
   [463242, 8660000],
+  [9840896, 97070000],
 ];
 
 export function testFindBlockCheckpointId(): void {
