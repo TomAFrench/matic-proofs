@@ -7,10 +7,16 @@ import { testBuildMerkleProof as testBuildMerkleProofOnchain } from "./proofs/on
 import { testBuildMerklePatriciaProof as testBuildMerklePatriciaProofOnchain } from "./proofs/onchain/merkle-patricia-proof";
 import { testFullProof as testFullProofOnchain } from "./proofs/onchain/full-proof";
 import { testFindBlockCheckpointId } from "./dataFetching/findCheckpoint";
+import { testCalculateExitHash } from "./dataFetching/calculateExitHash";
 
 describe("Unit tests", function () {
   describe("Data Fetching", function () {
-    testFindBlockCheckpointId();
+    describe("findBlockCheckpointId", function () {
+      testFindBlockCheckpointId();
+    });
+    describe("calculateExitHash", function () {
+      testCalculateExitHash();
+    });
   });
   describe("Proofs", function () {
     describe("Javascript checks", function () {

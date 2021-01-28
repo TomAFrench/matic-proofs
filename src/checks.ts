@@ -10,7 +10,7 @@ import { RequiredBlockMembers } from "./types";
 import { getCheckpointManager, getRootChainManager } from "./utils/contracts";
 import { hexToBuffer } from "./utils/buffer";
 
-const calculateExitHash = async (
+export const calculateExitHash = async (
   maticChainProvider: JsonRpcProvider,
   burnTxHash: string,
   logEventSigOrIndex: string | number,
