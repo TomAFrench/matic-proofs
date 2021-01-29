@@ -41,6 +41,7 @@ export const getFastMerkleProof = async (
   let leftBound = 0;
   let rightBound = endBlock - offset;
   for (let depth = 0; depth < merkleTreeDepth; depth += 1) {
+    /* eslint-disable no-await-in-loop */
 
     // The pivot leaf is the last leaf which is included in the left subtree
     const pivotLeaf = leftBound + 2 ** (merkleTreeDepth - depth - 1) - 1;
@@ -48,7 +49,6 @@ export const getFastMerkleProof = async (
     if (targetIndex > pivotLeaf) {
       // Get the root hash to the merkle subtree to the left
       const newLeftBound = pivotLeaf + 1;
-      // eslint-disable-next-line no-await-in-loop
       const subTreeMerkleRoot = await queryRootHash(maticProvider, offset + leftBound, offset + pivotLeaf);
       reversedProof.push(subTreeMerkleRoot);
       leftBound = newLeftBound;
@@ -76,7 +76,6 @@ export const getFastMerkleProof = async (
         // We need to build a tree which has heightDifference layers
 
         // The first leaf will hold the root hash as returned by the RPC
-        // eslint-disable-next-line no-await-in-loop
         const remainingNodesHash = await queryRootHash(maticProvider, offset + pivotLeaf + 1, offset + rightBound);
 
         // The remaining leaves will hold the merkle root of a zero-filled tree of height subTreeHeight
