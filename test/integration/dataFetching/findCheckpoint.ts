@@ -28,7 +28,7 @@ export function testFindBlockCheckpointId(): void {
     });
 
     it(`should return match the value reported by the subgraph for block number ${blockNumber}`, async () => {
-      const { checkpointId } = await subgraphGetCheckpoint(blockNumber);
+      const { checkpointId } = await subgraphGetCheckpoint(1, blockNumber);
 
       expect(checkpointId).to.eq(expectedCheckpointId);
     });

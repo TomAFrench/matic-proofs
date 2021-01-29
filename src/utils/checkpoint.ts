@@ -88,7 +88,11 @@ export const fallbackFindBlockCheckpointId = async (
   }
 };
 
-export const subgraphGetCheckpoint = async (blockNumber: number): Promise<Checkpoint> => {
+const CHAIN_ID_SUBGRAPH_MAP: Record<number, string> = {
+  1: "https://api.thegraph.com/subgraphs/name/nglglhtr/maticnetwork-mainnet",
+};
+
+export const subgraphGetCheckpoint = async (chainId: number, blockNumber: number): Promise<Checkpoint> => {
   const query = `
     query ($blockNumber: Int!) {
       newHeaderBlockEntities(where: {start_lte: $blockNumber, end_gte: $blockNumber}) {
@@ -104,7 +108,11 @@ export const subgraphGetCheckpoint = async (blockNumber: number): Promise<Checkp
     blockNumber,
   };
 
-  const subgraphURL = "https://api.thegraph.com/subgraphs/name/nglglhtr/maticnetwork-mainnet";
+  const subgraphURL = CHAIN_ID_SUBGRAPH_MAP[chainId];
+  if (!subgraphURL) {
+    throw Error("Failed to find subgraph for this chain id");
+  }
+
   const response = await fetch(subgraphURL, {
     method: "POST",
     body: JSON.stringify({ query, variables }),
@@ -135,7 +143,8 @@ export const getBlockCheckpoint = async (
   checkpointIdInterval: BigNumberish = BigNumber.from(10000),
 ): Promise<Checkpoint> => {
   try {
-    const checkpoint = await subgraphGetCheckpoint(childBlockNumber.toNumber());
+    const { chainId } = await rootChainProvider.getNetwork();
+    const checkpoint = await subgraphGetCheckpoint(chainId, childBlockNumber.toNumber());
     return checkpoint;
   } catch {
     // eslint-disable-next-line no-console
