@@ -8,6 +8,7 @@ import { testBuildMerklePatriciaProof as testBuildMerklePatriciaProofOnchain } f
 import { testFullProof as testFullProofOnchain } from "./proofs/onchain/full-proof";
 import { testFindBlockCheckpointId } from "./dataFetching/findCheckpoint";
 import { testCalculateExitHash } from "./dataFetching/calculateExitHash";
+import { testFullProof as testFullProofOnchainIntegration } from "./integration/proofs/full-proof";
 
 describe("Unit tests", function () {
   describe("Data Fetching", function () {
@@ -48,6 +49,16 @@ describe("Unit tests", function () {
 
       describe("buildFullProof", function () {
         testFullProofOnchain();
+      });
+    });
+  });
+});
+
+describe("Integration tests", function () {
+  describe("Proofs", function () {
+    describe("Solidity checks", function () {
+      describe("buildFullProof", function () {
+        testFullProofOnchainIntegration();
       });
     });
   });
