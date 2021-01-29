@@ -40,7 +40,6 @@ export const getFastMerkleProof = async (
   const targetIndex = blockNumber - offset;
   let leftBound = 0;
   let rightBound = endBlock - offset;
-  //   console.log("Searching for", targetIndex);
   for (let depth = 0; depth < merkleTreeDepth; depth += 1) {
     const nLeaves = 2 ** (merkleTreeDepth - depth);
 
