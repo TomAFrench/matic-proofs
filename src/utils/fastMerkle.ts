@@ -41,10 +41,9 @@ export const getFastMerkleProof = async (
   let leftBound = 0;
   let rightBound = endBlock - offset;
   for (let depth = 0; depth < merkleTreeDepth; depth += 1) {
-    const nLeaves = 2 ** (merkleTreeDepth - depth);
 
     // The pivot leaf is the last leaf which is included in the left subtree
-    const pivotLeaf = leftBound + nLeaves / 2 - 1;
+    const pivotLeaf = leftBound + 2 ** (merkleTreeDepth - depth - 1) - 1;
 
     if (targetIndex > pivotLeaf) {
       // Get the root hash to the merkle subtree to the left
