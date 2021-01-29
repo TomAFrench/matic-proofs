@@ -19,10 +19,11 @@ export type HeaderBlockCheckpoint = {
   proposer: string;
 };
 
-export type ReceiptMPProof = {
+export type MerklePatriciaProof = {
+  value: string;
+  path: string;
   parentNodes: string[];
   root: string;
-  path: string;
 };
 
 export interface BlockProof {

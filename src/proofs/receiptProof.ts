@@ -5,7 +5,7 @@ import { encode } from "@ethersproject/rlp";
 import { bufferToHex, rlp } from "ethereumjs-util";
 import { keccak256 } from "@ethersproject/solidity";
 import { BigNumber } from "@ethersproject/bignumber";
-import { ReceiptMPProof, ReceiptProof } from "../types";
+import { MerklePatriciaProof, ReceiptProof } from "../types";
 import { getFullBlockByHash } from "../utils/blocks";
 import { hexToBuffer } from "../utils/buffer";
 
@@ -64,12 +64,13 @@ export const buildMerklePatriciaProof = async (
   receipts: TransactionReceipt[],
   blockNumber: string,
   blockHash: string,
-): Promise<ReceiptMPProof> => {
+): Promise<MerklePatriciaProof> => {
   const receiptsTrie = await buildReceiptTrie(receipts, blockNumber, blockHash);
   const key = rlp.encode(receipt.transactionIndex);
   const proof = await BaseTrie.createProof(receiptsTrie, key);
 
   return {
+    value: getReceiptBytes(receipt),
     parentNodes: proof.map(bufferToHex),
     root: bufferToHex(receiptsTrie.root),
     path: hexConcat(["0x00", bufferToHex(key)]),
