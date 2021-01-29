@@ -54,8 +54,14 @@ export const getFastMerkleProof = async (
       leftBound = newLeftBound;
     } else {
       // Things are more complex when querying to the right.
-      // Root hash may come some layers down so we need to build a full tree by padding with zeros
-      // Some trees may be completely empty
+      //
+      // We need a subtree with a defined height fit in the layer one below the current one
+      // but for a given set of block numbers the node will return a hash for the smallest possible tree.
+      // We then need to construct the roots of empty merkle trees to pad out the rest of the layer
+      // on which the returned hash sits and complete calculating the merkle root.
+      //
+      // It's possible that none of the blocks in the checkpoint contribute to this subtree
+      // for which we just compute the hash of an empty tree of the correct height
 
       const newRightBound = Math.min(rightBound, pivotLeaf);
 
@@ -71,9 +77,6 @@ export const getFastMerkleProof = async (
 
         // Find the difference in height between this and the subtree we want
         const heightDifference = expectedHeight - subTreeHeight;
-
-        // For every extra layer we need to fill 2*n leaves filled with the merkle root of a zero-filled Merkle tree
-        // We need to build a tree which has heightDifference layers
 
         // The remaining leaves will hold the merkle root of a zero-filled tree of height subTreeHeight
         const leafRoots = recursiveZeroHash(subTreeHeight);
