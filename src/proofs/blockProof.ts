@@ -44,7 +44,7 @@ export const buildBlockProof = async (
   }
 
   const checkpointManager = await getCheckpointManager(rootChainProvider, rootChainContractAddress);
-  const checkpointId = await findBlockCheckpointId(checkpointManager, blockNumber);
+  const checkpointId = await findBlockCheckpointId(checkpointManager, BigNumber.from(blockNumber));
 
   // Pull out the blocks which need to be downloaded to build merkle proof
   const checkpoint: HeaderBlockCheckpoint = await checkpointManager.headerBlocks(checkpointId.toString());

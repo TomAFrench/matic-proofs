@@ -1,6 +1,7 @@
 /* eslint-disable func-names */
+import { BigNumber } from "@ethersproject/bignumber";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { findBlockCheckpointId } from "../../../src/utils/checkpoint";
+import { findBlockCheckpointId, subgraphGetCheckpoint } from "../../../src/utils/checkpoint";
 import { getCheckpointManager } from "../../../src/utils/contracts";
 import chai from "../../chai-setup";
 
@@ -12,6 +13,7 @@ const testData: [number, number][] = [
   [8657042, 88660000],
   [463242, 8660000],
   [9840896, 97070000],
+  // [100000000000, 19],
 ];
 
 export function testFindBlockCheckpointId(): void {
@@ -21,7 +23,13 @@ export function testFindBlockCheckpointId(): void {
 
       const rootChainManagerProxy = "0xa0c68c638235ee32657e8f720a23cec1bfc77c77";
       const checkpointManager = await getCheckpointManager(provider, rootChainManagerProxy);
-      const checkpointId = await findBlockCheckpointId(checkpointManager, blockNumber);
+      const checkpointId = await findBlockCheckpointId(checkpointManager, BigNumber.from(blockNumber));
+
+      expect(checkpointId).to.eq(expectedCheckpointId);
+    });
+
+    it(`should return match the value reported by the subgraph for block number ${blockNumber}`, async () => {
+      const { checkpointId } = await subgraphGetCheckpoint(blockNumber);
 
       expect(checkpointId).to.eq(expectedCheckpointId);
     });
