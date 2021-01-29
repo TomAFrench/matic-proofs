@@ -89,7 +89,6 @@ export const buildReceiptProof = async (
   const receiptProof = await buildMerklePatriciaProof(receipt, receipts, burnTxBlock.number, burnTxBlock.hash);
   return {
     receipt,
-    receiptProof,
-    receiptsRoot: burnTxBlock.receiptsRoot,
+    ...receiptProof,
   };
 };

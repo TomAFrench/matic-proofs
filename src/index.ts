@@ -70,7 +70,7 @@ export const buildPayloadForExit = async (
     typeof logEventSigOrIndex === "string" ? getLogIndex(burnTxReceipt, logEventSigOrIndex) : logEventSigOrIndex;
 
   // Build proof that the burn transaction is included in this block.
-  const { receipt, receiptProof } = await buildReceiptProof(maticChainProvider, burnTxHash);
+  const { receipt, parentNodes, path } = await buildReceiptProof(maticChainProvider, burnTxHash);
 
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
@@ -91,8 +91,8 @@ export const buildPayloadForExit = async (
     transactionsRoot,
     receiptsRoot,
     receipt,
-    receiptProofParentNodes: receiptProof.parentNodes,
-    receiptProofPath: receiptProof.path,
+    receiptProofParentNodes: parentNodes,
+    receiptProofPath: path,
     logIndex,
   };
 };

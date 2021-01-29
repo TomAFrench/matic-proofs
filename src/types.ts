@@ -35,11 +35,9 @@ export interface BlockProof {
   blockProof: string[];
 }
 
-export type ReceiptProof = {
+export interface ReceiptProof extends MerklePatriciaProof {
   receipt: TransactionReceipt;
-  receiptProof: ReceiptMPProof;
-  receiptsRoot: string;
-};
+}
 
 export interface ExitProof {
   headerBlockNumber: number;
