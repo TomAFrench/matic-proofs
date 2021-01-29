@@ -75,15 +75,14 @@ export const getFastMerkleProof = async (
         // For every extra layer we need to fill 2*n leaves filled with the merkle root of a zero-filled Merkle tree
         // We need to build a tree which has heightDifference layers
 
-        // The first leaf will hold the root hash as returned by the RPC
-        const remainingNodesHash = await queryRootHash(maticProvider, offset + pivotLeaf + 1, offset + rightBound);
-
         // The remaining leaves will hold the merkle root of a zero-filled tree of height subTreeHeight
         const leafRoots = recursiveZeroHash(subTreeHeight);
 
         // Build a merkle tree of correct size for the subtree using these merkle roots
         const leaves = Array.from({ length: 2 ** heightDifference }, () => leafRoots);
-        leaves[0] = remainingNodesHash;
+
+        // The root hash as returned by the RPC will always sit in leftmost leaf
+        leaves[0] = await queryRootHash(maticProvider, offset + pivotLeaf + 1, offset + rightBound);
 
         const subTreeMerkleRoot = new MerkleTree(leaves).getRoot();
         reversedProof.push(subTreeMerkleRoot);
