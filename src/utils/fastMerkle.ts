@@ -13,6 +13,38 @@ const recursiveZeroHash = (n: number): string => {
 };
 
 /**
+ * Constructs a merkle tree of the desired height
+ * @param maticProvider - the provider from which to query merkle roots
+ * @param expectedHeight - the desired height of the merkle tree
+ * @param startBlock - the blocknumber of the first block in the checkpoint
+ * @param endBlock - the blocknumber of the last block in the checkpoint
+ */
+const buildRootHash = async (
+  maticProvider: JsonRpcProvider,
+  expectedHeight: number,
+  startBlock: number,
+  endBlock: number,
+) => {
+  // Height of tree given by RPC node
+  const subTreeHeight = Math.ceil(Math.log2(endBlock - startBlock + 1));
+
+  // Find the difference in height between this and the tree we want
+  const heightDifference = expectedHeight - subTreeHeight;
+
+  // The remaining leaves will hold the merkle root of a zero-filled tree of height subTreeHeight
+  const leafRoots = recursiveZeroHash(subTreeHeight);
+
+  // Build a merkle tree of correct size for the subtree using these merkle roots
+  const leaves = Array.from({ length: 2 ** heightDifference }, () => leafRoots);
+
+  // The root hash as returned by the RPC will always sit in leftmost leaf
+  leaves[0] = await queryRootHash(maticProvider, startBlock, endBlock);
+
+  const merkleRoot = new MerkleTree(leaves).getRoot();
+  return merkleRoot;
+};
+
+/**
  * Function to quickly calculate a merkle proof of block inclusion in a checkpoint
  * Makes use of the `eth_getRootHash` method on Matic nodes to reduce number of requests
  * @dev Starts from the top of the merkle tree and determines which subtree the leaf of interest is in.
@@ -34,7 +66,7 @@ export const getFastMerkleProof = async (
   const merkleTreeDepth = Math.ceil(Math.log2(endBlock - startBlock + 1));
 
   // We generate the proof root down, whereas we need from leaf up
-  const reversedProof: string[] = [];
+  const reversedProof: Promise<string>[] = [];
 
   const offset = startBlock;
   const targetIndex = blockNumber - offset;
@@ -49,7 +81,7 @@ export const getFastMerkleProof = async (
     if (targetIndex > pivotLeaf) {
       // Get the root hash to the merkle subtree to the left
       const newLeftBound = pivotLeaf + 1;
-      const subTreeMerkleRoot = await queryRootHash(maticProvider, offset + leftBound, offset + pivotLeaf);
+      const subTreeMerkleRoot = queryRootHash(maticProvider, offset + leftBound, offset + pivotLeaf);
       reversedProof.push(subTreeMerkleRoot);
       leftBound = newLeftBound;
     } else {
@@ -70,29 +102,19 @@ export const getFastMerkleProof = async (
       if (rightBound <= pivotLeaf) {
         // Tree is empty so we repeatedly hash zero to correct height
         const subTreeMerkleRoot = recursiveZeroHash(expectedHeight);
-        reversedProof.push(subTreeMerkleRoot);
+        reversedProof.push(Promise.resolve(subTreeMerkleRoot));
       } else {
-        // Height of tree given by RPC node
-        const subTreeHeight = Math.ceil(Math.log2(rightBound - pivotLeaf));
-
-        // Find the difference in height between this and the subtree we want
-        const heightDifference = expectedHeight - subTreeHeight;
-
-        // The remaining leaves will hold the merkle root of a zero-filled tree of height subTreeHeight
-        const leafRoots = recursiveZeroHash(subTreeHeight);
-
-        // Build a merkle tree of correct size for the subtree using these merkle roots
-        const leaves = Array.from({ length: 2 ** heightDifference }, () => leafRoots);
-
-        // The root hash as returned by the RPC will always sit in leftmost leaf
-        leaves[0] = await queryRootHash(maticProvider, offset + pivotLeaf + 1, offset + rightBound);
-
-        const subTreeMerkleRoot = new MerkleTree(leaves).getRoot();
+        const subTreeMerkleRoot = buildRootHash(
+          maticProvider,
+          expectedHeight,
+          offset + pivotLeaf + 1,
+          offset + rightBound,
+        );
         reversedProof.push(subTreeMerkleRoot);
       }
       rightBound = newRightBound;
     }
   }
 
-  return reversedProof.reverse();
+  return Promise.all(reversedProof.reverse());
 };
