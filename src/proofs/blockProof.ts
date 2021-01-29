@@ -2,10 +2,9 @@ import { JsonRpcProvider, Provider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { keccak256 as solidityKeccak256 } from "@ethersproject/solidity";
 import MerkleTree from "../utils/merkleTree";
-import { BlockProof, HeaderBlockCheckpoint, RequiredBlockMembers } from "../types";
-import { findBlockCheckpointId } from "../utils/checkpoint";
+import { BlockProof, RequiredBlockMembers } from "../types";
+import { getBlockCheckpoint } from "../utils/checkpoint";
 import { isBlockCheckpointed } from "../checks";
-import { getCheckpointManager } from "../utils/contracts";
 import { getFullBlockByNumber } from "../utils/blocks";
 import { getFastMerkleProof } from "../utils/fastMerkle";
 
@@ -43,13 +42,7 @@ export const buildBlockProof = async (
     throw new Error("Block has not been checkpointed yet");
   }
 
-  const checkpointManager = await getCheckpointManager(rootChainProvider, rootChainContractAddress);
-  const checkpointId = await findBlockCheckpointId(checkpointManager, BigNumber.from(blockNumber));
-
-  // Pull out the blocks which need to be downloaded to build merkle proof
-  const checkpoint: HeaderBlockCheckpoint = await checkpointManager.headerBlocks(checkpointId.toString());
-  const startBlock = BigNumber.from(checkpoint.start).toNumber();
-  const endBlock = BigNumber.from(checkpoint.end).toNumber();
+  const checkpoint = await getBlockCheckpoint(rootChainProvider, rootChainContractAddress, BigNumber.from(blockNumber));
 
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
@@ -57,8 +50,8 @@ export const buildBlockProof = async (
   const merkleProof = await getFastMerkleProof(
     maticChainProvider,
     BigNumber.from(blockNumber).toNumber(),
-    startBlock,
-    endBlock,
+    checkpoint.start.toNumber(),
+    checkpoint.end.toNumber(),
   );
 
   const blockProof = {
@@ -66,7 +59,7 @@ export const buildBlockProof = async (
     burnTxBlockTimestamp: BigNumber.from(burnTxBlock.timestamp).toNumber(),
     transactionsRoot: burnTxBlock.transactionsRoot,
     receiptsRoot: burnTxBlock.receiptsRoot,
-    headerBlockNumber: checkpointId.toNumber(),
+    headerBlockNumber: checkpoint.checkpointId.toNumber(),
     blockProof: merkleProof,
   };
   return blockProof;

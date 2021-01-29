@@ -1,6 +1,9 @@
 import fetch from "isomorphic-fetch";
 import { Contract } from "@ethersproject/contracts";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { Provider } from "@ethersproject/providers";
+import { Checkpoint, HeaderBlockCheckpoint } from "../types";
+import { getCheckpointManager } from "./contracts";
 
 const checkBlockInCheckpoint = async (
   checkpointManager: Contract,
@@ -85,12 +88,11 @@ export const fallbackFindBlockCheckpointId = async (
   }
 };
 
-export const subgraphGetCheckpoint = async (
-  blockNumber: number,
-): Promise<{ checkpointId: number; start: number; end: number }> => {
+export const subgraphGetCheckpoint = async (blockNumber: number): Promise<Checkpoint> => {
   const query = `
     query ($blockNumber: Int!) {
       newHeaderBlockEntities(where: {start_lte: $blockNumber, end_gte: $blockNumber}) {
+        root
         headerBlockId
         start
         end
@@ -107,6 +109,7 @@ export const subgraphGetCheckpoint = async (
     method: "POST",
     body: JSON.stringify({ query, variables }),
   });
+
   if (!response.ok) {
     throw Error(response.statusText);
   }
@@ -118,22 +121,31 @@ export const subgraphGetCheckpoint = async (
   const headerData = data.newHeaderBlockEntities[0];
 
   return {
-    checkpointId: parseInt(headerData.headerBlockId, 10),
-    start: parseInt(headerData.start, 10),
-    end: parseInt(headerData.end, 10),
+    checkpointId: BigNumber.from(headerData.headerBlockId),
+    start: BigNumber.from(headerData.start),
+    end: BigNumber.from(headerData.end),
+    root: headerData.root,
   };
 };
 
-export const findBlockCheckpointId = async (
-  checkpointManager: Contract,
+export const getBlockCheckpoint = async (
+  rootChainProvider: Provider,
+  rootChainContractAddress: string,
   childBlockNumber: BigNumber,
   checkpointIdInterval: BigNumberish = BigNumber.from(10000),
-): Promise<BigNumber> => {
+): Promise<Checkpoint> => {
   try {
-    const { checkpointId } = await subgraphGetCheckpoint(childBlockNumber.toNumber());
-    return BigNumber.from(checkpointId);
+    const checkpoint = await subgraphGetCheckpoint(childBlockNumber.toNumber());
+    return checkpoint;
   } catch {
-    console.log("using fallback");
-    return fallbackFindBlockCheckpointId(checkpointManager, childBlockNumber, checkpointIdInterval);
+    // eslint-disable-next-line no-console
+    console.log("Subgraph failed to return checkpoint. Falling back to on-chain lookup.");
+    const checkpointManager = await getCheckpointManager(rootChainProvider, rootChainContractAddress);
+    const checkpointId = await fallbackFindBlockCheckpointId(checkpointManager, childBlockNumber, checkpointIdInterval);
+    const checkpoint: HeaderBlockCheckpoint = await checkpointManager.headerBlocks(checkpointId);
+    return {
+      checkpointId,
+      ...checkpoint,
+    };
   }
 };
