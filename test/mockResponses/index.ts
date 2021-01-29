@@ -7,9 +7,9 @@ import { HeaderBlockCheckpoint, RequiredBlockMembers } from "../../src/types";
 export const CHECKPOINT_ID = BigNumber.from(96930000);
 export const CHECKPOINT: HeaderBlockCheckpoint = {
   root: "0xe459e9f7439f54989ee693ba93802793c02880a824979d476544378d3f66d174",
-  start: 9825948,
-  end: 9827227,
-  createdAt: 1611142592,
+  start: BigNumber.from(9825948),
+  end: BigNumber.from(9827227),
+  createdAt: BigNumber.from(1611142592),
   proposer: "0x7fCD58C2D53D980b247F1612FdbA93E9a76193E6",
 };
 

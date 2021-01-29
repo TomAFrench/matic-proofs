@@ -1,6 +1,6 @@
 {
   "name": "@tomfrench/matic-proofs",
-  "version": "0.1.0-alpha.25",
+  "version": "0.2.0-alpha.2",
   "description": "Package to generate the required proofs to exit funds from Matic Network",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -34,6 +34,7 @@
     "@openzeppelin/contracts": "3.1.0",
     "@types/bluebird": "^3.5.32",
     "@types/chai": "^4.2.14",
+    "@types/isomorphic-fetch": "^0.0.35",
     "@types/mocha": "^8.2.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
@@ -53,6 +54,7 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "ethereumjs-util": "^7.0.5",
+    "isomorphic-fetch": "^3.0.0",
     "merkle-patricia-tree": "^4.0.0"
   },
   "peerDependencies": {

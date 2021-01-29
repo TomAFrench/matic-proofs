@@ -51,7 +51,8 @@ export const buildPayloadForExit = async (
   maticChainProvider: JsonRpcProvider,
   rootChainContractAddress: string,
   burnTxHash: string,
-  logEventSigOrIndex: string | number,
+  logEventSigOrIndex: string,
+  selectedBurn = 0,
 ): Promise<ExitProof> => {
   // Check that we can actually confirm that the burn transaction exists
   const burnTxReceipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
@@ -63,14 +64,10 @@ export const buildPayloadForExit = async (
     throw new Error("Could not find blockHash of burnTx");
   }
 
-  // If user has provided a string, find index of the first matching withdraw event in the receipt.
-  // If user has provided a number, take this as the index of the desired withdrawal event.
-  // This is necessary as a transaction can have multiple withdrawals.
-  const logIndex =
-    typeof logEventSigOrIndex === "string" ? getLogIndex(burnTxReceipt, logEventSigOrIndex) : logEventSigOrIndex;
+  const logIndex = getLogIndex(burnTxReceipt, logEventSigOrIndex, selectedBurn);
 
   // Build proof that the burn transaction is included in this block.
-  const { receipt, receiptProof } = await buildReceiptProof(maticChainProvider, burnTxHash);
+  const { receipt, parentNodes, path } = await buildReceiptProof(maticChainProvider, burnTxHash);
 
   // Build proof that block containing burnTx is included in Matic chain.
   // Proves that a block with the stated blocknumber has been included in a checkpoint
@@ -91,8 +88,8 @@ export const buildPayloadForExit = async (
     transactionsRoot,
     receiptsRoot,
     receipt,
-    receiptProofParentNodes: receiptProof.parentNodes,
-    receiptProofPath: receiptProof.path,
+    receiptProofParentNodes: parentNodes,
+    receiptProofPath: path,
     logIndex,
   };
 };

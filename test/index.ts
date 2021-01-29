@@ -1,16 +1,16 @@
 /* eslint-disable func-names */
 import { testFullProof as testFullProofOffChain } from "./proofs/offchain/full-proof";
 import { testBuildMerkleProof as testBuildMerkleProofOffchain } from "./proofs/offchain/merkle-proof";
+import { testFastMerkleProof as testFastMerkleProofOffchain } from "./integration/proofs/fast-merkle-proof";
 import { testBuildMerklePatriciaProof as testBuildMerklePatriciaProofOffchain } from "./proofs/offchain/merkle-patricia-proof";
 import { testBuildMerkleProof as testBuildMerkleProofOnchain } from "./proofs/onchain/merkle-proof";
 import { testBuildMerklePatriciaProof as testBuildMerklePatriciaProofOnchain } from "./proofs/onchain/merkle-patricia-proof";
 import { testFullProof as testFullProofOnchain } from "./proofs/onchain/full-proof";
-import { testFindBlockCheckpointId } from "./dataFetching/findCheckpoint";
+import { testFindBlockCheckpointId } from "./integration/dataFetching/findCheckpoint";
+import { testCalculateExitHash } from "./integration/dataFetching/calculateExitHash";
+import { testFullProof as testFullProofOnchainIntegration } from "./integration/proofs/full-proof";
 
 describe("Unit tests", function () {
-  describe("Data Fetching", function () {
-    testFindBlockCheckpointId();
-  });
   describe("Proofs", function () {
     describe("Javascript checks", function () {
       describe("buildMerkleProof", function () {
@@ -37,6 +37,30 @@ describe("Unit tests", function () {
 
       describe("buildFullProof", function () {
         testFullProofOnchain();
+      });
+    });
+  });
+});
+
+describe("Integration tests", function () {
+  describe("Data Fetching", function () {
+    describe("findBlockCheckpointId", function () {
+      testFindBlockCheckpointId();
+    });
+    describe("calculateExitHash", function () {
+      testCalculateExitHash();
+    });
+  });
+  describe("Proofs", function () {
+    describe("Javascript checks", function () {
+      describe("fastMerkleProof", function () {
+        testFastMerkleProofOffchain();
+      });
+    });
+
+    describe("Solidity checks", function () {
+      describe("buildFullProof", function () {
+        testFullProofOnchainIntegration();
       });
     });
   });

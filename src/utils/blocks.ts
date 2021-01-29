@@ -19,7 +19,10 @@ const toTrimmedHexString = (hexNumber: BigNumberish) => {
 export const getFullBlockByHash = async (provider: JsonRpcProvider, blockHash: string): Promise<RequiredBlockMembers> =>
   provider.perform("getBlock", { blockHash });
 
-const getFullBlockByNumber = (provider: JsonRpcProvider, blockNumber: BigNumberish): Promise<RequiredBlockMembers> =>
+export const getFullBlockByNumber = (
+  provider: JsonRpcProvider,
+  blockNumber: BigNumberish,
+): Promise<RequiredBlockMembers> =>
   provider.perform("getBlock", {
     blockTag: toTrimmedHexString(blockNumber),
   });

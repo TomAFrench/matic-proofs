@@ -1,4 +1,4 @@
-import { BigNumberish } from "@ethersproject/bignumber";
+import { BigNumber } from "@ethersproject/bignumber";
 import { TransactionReceipt } from "@ethersproject/providers";
 
 export interface RequiredBlockMembers {
@@ -11,18 +11,23 @@ export interface RequiredBlockMembers {
   transactionsRoot: string;
 }
 
-export type HeaderBlockCheckpoint = {
+export interface HeaderBlockCheckpoint {
   root: string;
-  start: BigNumberish;
-  end: BigNumberish;
-  createdAt: BigNumberish;
+  start: BigNumber;
+  end: BigNumber;
+  createdAt: BigNumber;
   proposer: string;
+}
+
+export type Checkpoint = Omit<HeaderBlockCheckpoint, "createdAt" | "proposer"> & {
+  checkpointId: BigNumber;
 };
 
-export type ReceiptMPProof = {
+export type MerklePatriciaProof = {
+  value: string;
+  path: string;
   parentNodes: string[];
   root: string;
-  path: string;
 };
 
 export interface BlockProof {
@@ -34,11 +39,9 @@ export interface BlockProof {
   blockProof: string[];
 }
 
-export type ReceiptProof = {
+export interface ReceiptProof extends MerklePatriciaProof {
   receipt: TransactionReceipt;
-  receiptProof: ReceiptMPProof;
-  receiptsRoot: string;
-};
+}
 
 export interface ExitProof {
   headerBlockNumber: number;
