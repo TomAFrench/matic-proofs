@@ -1,8 +1,8 @@
 /* eslint-disable func-names */
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { ERC20_TRANSFER_EVENT_SIG } from "../../src";
-import { calculateExitHash } from "../../src/checks";
-import chai from "../chai-setup";
+import { ERC20_TRANSFER_EVENT_SIG } from "../../../src";
+import { calculateExitHash } from "../../../src/checks";
+import chai from "../../chai-setup";
 
 const { expect } = chai;
 

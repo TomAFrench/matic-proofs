@@ -1,8 +1,8 @@
 /* eslint-disable func-names */
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { findBlockCheckpointId } from "../../src/utils/checkpoint";
-import { getCheckpointManager } from "../../src/utils/contracts";
-import chai from "../chai-setup";
+import { findBlockCheckpointId } from "../../../src/utils/checkpoint";
+import { getCheckpointManager } from "../../../src/utils/contracts";
+import chai from "../../chai-setup";
 
 const { expect } = chai;
 
