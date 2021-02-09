@@ -1,6 +1,6 @@
 /* eslint-disable func-names */
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { ERC20_TRANSFER_EVENT_SIG } from "../../../src";
+import { EventSignature } from "../../../src";
 import { calculateExitHash } from "../../../src/checks";
 import chai from "../../chai-setup";
 
@@ -30,7 +30,7 @@ export function testCalculateExitHash(): void {
     it(`should return ${expectedExitHash} as exit hash for burn hash ${burnHash}`, async () => {
       const provider = new JsonRpcProvider("https://rpc-mainnet.matic.network");
 
-      const exitHash = await calculateExitHash(provider, burnHash, ERC20_TRANSFER_EVENT_SIG);
+      const exitHash = await calculateExitHash(provider, burnHash, EventSignature.ERC20Transfer);
 
       expect(exitHash).to.eq(expectedExitHash);
     });

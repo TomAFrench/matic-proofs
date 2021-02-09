@@ -9,11 +9,12 @@ import { getLogIndex } from "./utils/logIndex";
 import { RequiredBlockMembers } from "./types";
 import { getCheckpointManager, getRootChainManager } from "./utils/contracts";
 import { hexToBuffer } from "./utils/buffer";
+import { EventSignature } from "./constants";
 
 export const calculateExitHash = async (
   maticChainProvider: JsonRpcProvider,
   burnTxHash: string,
-  logEventSigOrIndex: string,
+  logEventSig: EventSignature,
   selectedBurn = 0,
 ): Promise<string> => {
   const burnTxReceipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
@@ -35,7 +36,7 @@ export const calculateExitHash = async (
     });
   const nibblesHex = hexConcat(nibbleArray);
 
-  const logIndex = getLogIndex(burnTxReceipt, logEventSigOrIndex, selectedBurn);
+  const logIndex = getLogIndex(burnTxReceipt, logEventSig, selectedBurn);
   const exitHash = solidityKeccak256(
     ["uint256", "bytes", "uint256"],
     [burnTxReceipt.blockNumber, nibblesHex, logIndex],
@@ -49,7 +50,7 @@ export const isBurnTxProcessed = async (
   maticChainProvider: JsonRpcProvider,
   rootChainContractAddress: string,
   burnTxHash: string,
-  logEventSig: string,
+  logEventSig: EventSignature,
 ): Promise<boolean> => {
   const exitHash = await calculateExitHash(maticChainProvider, burnTxHash, logEventSig);
   const rootChainContract = getRootChainManager(rootChainProvider, rootChainContractAddress);
@@ -88,7 +89,7 @@ export const isBurnTxClaimable = async (
   maticChainProvider: JsonRpcProvider,
   rootChainContractAddress: string,
   burnTxHash: string,
-  logEventSig: string,
+  logEventSig: EventSignature,
 ): Promise<boolean> => {
   const alreadyClaimed = await isBurnTxProcessed(
     rootChainProvider,
