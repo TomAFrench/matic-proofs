@@ -32,16 +32,16 @@ export const getLogIndex = (
   selectedBurn = 0,
 ): number => {
   const predicate = predicateMap[logEventSig];
-  const burnIndices = transactionReceipt.logs.reduce((acc: number[], log, index) => {
+  const eventIndices = transactionReceipt.logs.reduce((acc: number[], log, index) => {
     if (predicate(log.topics)) {
       acc.push(index);
     }
     return acc;
   }, []);
 
-  if (burnIndices.length === 0) {
+  if (eventIndices.length === 0) {
     throw new Error("Burn log not found in receipt");
   }
 
-  return burnIndices[selectedBurn];
+  return eventIndices[selectedBurn];
 };

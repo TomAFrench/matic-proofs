@@ -48,13 +48,15 @@ export const calculateExitHash = async (
 export const isBurnTxProcessed = async (
   rootChainProvider: Provider,
   maticChainProvider: JsonRpcProvider,
-  rootChainContractAddress: string,
+  exitProcessorAddress: string,
   burnTxHash: string,
   logEventSig: EventSignature,
 ): Promise<boolean> => {
   const exitHash = await calculateExitHash(maticChainProvider, burnTxHash, logEventSig);
-  const rootChainContract = getRootChainManager(rootChainProvider, rootChainContractAddress);
-  return rootChainContract.processedExits(exitHash);
+  // We do a slight cheat here as the exitProcessor may not be a rootChainManager
+  // However we only need the processedExits function which the rootChainManager ABI has.
+  const exitProcessorContract = getRootChainManager(rootChainProvider, exitProcessorAddress);
+  return exitProcessorContract.processedExits(exitHash);
 };
 
 export const isBlockCheckpointed = async (
@@ -90,11 +92,12 @@ export const isBurnTxClaimable = async (
   rootChainContractAddress: string,
   burnTxHash: string,
   logEventSig: EventSignature,
+  exitProcessorAddress: string = rootChainContractAddress,
 ): Promise<boolean> => {
   const alreadyClaimed = await isBurnTxProcessed(
     rootChainProvider,
     maticChainProvider,
-    rootChainContractAddress,
+    exitProcessorAddress,
     burnTxHash,
     logEventSig,
   );
