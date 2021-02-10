@@ -90,6 +90,7 @@ export const fallbackFindBlockCheckpointId = async (
 
 const CHAIN_ID_SUBGRAPH_MAP: Record<number, string> = {
   1: "https://api.thegraph.com/subgraphs/name/nglglhtr/maticnetwork-mainnet",
+  5: "https://api.thegraph.com/subgraphs/name/nglglhtr/maticnetwork-goerli",
 };
 
 export const subgraphGetCheckpoint = async (chainId: number, blockNumber: number): Promise<Checkpoint> => {
