@@ -13,12 +13,6 @@ export { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
 export { isBlockCheckpointed, isBurnTxCheckpointed, isBurnTxProcessed, isBurnTxClaimable } from "./checks";
 export * from "./constants";
 
-export const ERC20_TRANSFER_EVENT_SIG = EventSignature.ERC20Transfer;
-export const ERC721_TRANSFER_EVENT_SIG = EventSignature.ERC721Transfer;
-export const ERC1155_TRANSFER_SINGLE_EVENT_SIG = EventSignature.ERC1155TransferSingle;
-export const ERC1155_TRANSFER_BATCH_EVENT_SIG = EventSignature.ERC1155TransferBatch;
-export const SEND_MESSAGE_EVENT_SIG = EventSignature.SendMessage;
-
 export const encodePayload = ({
   headerBlockNumber,
   blockProof,
