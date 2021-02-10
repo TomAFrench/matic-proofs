@@ -9,11 +9,12 @@ import { getLogIndex } from "./utils/logIndex";
 import { RequiredBlockMembers } from "./types";
 import { getCheckpointManager, getRootChainManager } from "./utils/contracts";
 import { hexToBuffer } from "./utils/buffer";
+import { EventSignature } from "./constants";
 
 export const calculateExitHash = async (
   maticChainProvider: JsonRpcProvider,
   burnTxHash: string,
-  logEventSigOrIndex: string,
+  logEventSig: EventSignature,
   selectedBurn = 0,
 ): Promise<string> => {
   const burnTxReceipt = await maticChainProvider.getTransactionReceipt(burnTxHash);
@@ -35,7 +36,7 @@ export const calculateExitHash = async (
     });
   const nibblesHex = hexConcat(nibbleArray);
 
-  const logIndex = getLogIndex(burnTxReceipt, logEventSigOrIndex, selectedBurn);
+  const logIndex = getLogIndex(burnTxReceipt, logEventSig, selectedBurn);
   const exitHash = solidityKeccak256(
     ["uint256", "bytes", "uint256"],
     [burnTxReceipt.blockNumber, nibblesHex, logIndex],
@@ -44,18 +45,34 @@ export const calculateExitHash = async (
   return exitHash;
 };
 
+/**
+ * Check whether a message has already been processed on root chain
+ * @param rootChainProvider - a Provider for the root chain (Ethereum)
+ * @param maticChainProvider - a JSONRpcProvider for the child chain (Matic)
+ * @param rootChainContractAddress - The address of the rootChainManager contract
+ * @param burnTxHash - The hash of the transaction of interest on the child chain
+ * @param logEventSig - The event signature for the log to check for
+ */
 export const isBurnTxProcessed = async (
   rootChainProvider: Provider,
   maticChainProvider: JsonRpcProvider,
-  rootChainContractAddress: string,
+  exitProcessorAddress: string,
   burnTxHash: string,
-  logEventSig: string,
+  logEventSig: EventSignature,
 ): Promise<boolean> => {
   const exitHash = await calculateExitHash(maticChainProvider, burnTxHash, logEventSig);
-  const rootChainContract = getRootChainManager(rootChainProvider, rootChainContractAddress);
-  return rootChainContract.processedExits(exitHash);
+  // We do a slight cheat here as the exitProcessor may not be a rootChainManager
+  // However we only need the processedExits function which the rootChainManager ABI has.
+  const exitProcessorContract = getRootChainManager(rootChainProvider, exitProcessorAddress);
+  return exitProcessorContract.processedExits(exitHash);
 };
 
+/**
+ * Check whether a particular block on Matic has been checkpointed on the root chain
+ * @param rootChainProvider - a Provider for the root chain (Ethereum)
+ * @param rootChainContractAddress - The address of the rootChainManager contract
+ * @param blockNumber - The block number which we want to know the checkpoint status of
+ */
 export const isBlockCheckpointed = async (
   rootChainProvider: Provider,
   rootChainContractAddress: string,
@@ -67,6 +84,13 @@ export const isBlockCheckpointed = async (
   return BigNumber.from(lastChildBlock).gte(blockNumber);
 };
 
+/**
+ * Check whether a particular transaction has been checkpointed on the root chain
+ * @param rootChainProvider - a Provider for the root chain (Ethereum)
+ * @param maticChainProvider - a JSONRpcProvider for the child chain (Matic)
+ * @param rootChainContractAddress - The address of the rootChainManager contract
+ * @param burnTxHash - The hash of the transaction of interest on the child chain
+ */
 export const isBurnTxCheckpointed = async (
   rootChainProvider: Provider,
   maticChainProvider: JsonRpcProvider,
@@ -83,17 +107,27 @@ export const isBurnTxCheckpointed = async (
   return isBlockCheckpointed(rootChainProvider, rootChainContractAddress, burnTx.blockNumber);
 };
 
+/**
+ * Check whether an event log from a given transaction has been processed on the root chain
+ * @param rootChainProvider - a Provider for the root chain (Ethereum)
+ * @param maticChainProvider - a JSONRpcProvider for the child chain (Matic)
+ * @param rootChainContractAddress - The address of the rootChainManager contract
+ * @param burnTxHash - The hash of the transaction of interest on the child chain
+ * @param logEventSig - The event signature for the log to check for
+ * @param exitProcessorAddress - The address of the contract which tracks whether this exit has been processed
+ */
 export const isBurnTxClaimable = async (
   rootChainProvider: Provider,
   maticChainProvider: JsonRpcProvider,
   rootChainContractAddress: string,
   burnTxHash: string,
-  logEventSig: string,
+  logEventSig: EventSignature,
+  exitProcessorAddress: string = rootChainContractAddress,
 ): Promise<boolean> => {
   const alreadyClaimed = await isBurnTxProcessed(
     rootChainProvider,
     maticChainProvider,
-    rootChainContractAddress,
+    exitProcessorAddress,
     burnTxHash,
     logEventSig,
   );

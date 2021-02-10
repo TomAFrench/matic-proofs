@@ -1,5 +1,24 @@
 import { TransactionReceipt } from "@ethersproject/providers";
 import { HashZero } from "@ethersproject/constants";
+import { EventSignature } from "../constants";
+
+// Due to withdrawals sharing the Transfer event, we must add some extra checks to ignore non-burn transfers
+// This is required to be able to handle transactions which moves tokens and then burns them atomically
+const defaultPredicate = (expectedEventSig: string, topics: string[]) => topics[0].toLowerCase() === expectedEventSig;
+const erc20LikePredicate = (expectedEventSig: string, topics: string[]) =>
+  defaultPredicate(expectedEventSig, topics) && topics[2].toLowerCase() === HashZero;
+const erc1155LikePredicate = (expectedEventSig: string, topics: string[]) =>
+  defaultPredicate(expectedEventSig, topics) && topics[3].toLowerCase() === HashZero;
+
+const predicateMap: Record<EventSignature, (topics: string[]) => boolean> = {
+  [EventSignature.ERC20Transfer]: (topics: string[]) => erc20LikePredicate(EventSignature.ERC20Transfer, topics),
+  [EventSignature.ERC721Transfer]: (topics: string[]) => erc20LikePredicate(EventSignature.ERC721Transfer, topics),
+  [EventSignature.ERC1155TransferSingle]: (topics: string[]) =>
+    erc1155LikePredicate(EventSignature.ERC1155TransferSingle, topics),
+  [EventSignature.ERC1155TransferBatch]: (topics: string[]) =>
+    erc1155LikePredicate(EventSignature.ERC1155TransferBatch, topics),
+  [EventSignature.SendMessage]: (topics: string[]) => defaultPredicate(EventSignature.SendMessage, topics),
+};
 
 /**
  * Pulls the index of the first burn log from a transaction receipt.
@@ -7,19 +26,22 @@ import { HashZero } from "@ethersproject/constants";
  * @param logEventSig - The log which corresponds to the Transfer event for the asset type being burnt
  * @param selectedBurn - selects which burn we want to find the index for
  */
-export const getLogIndex = (transactionReceipt: TransactionReceipt, logEventSig: string, selectedBurn = 0): number => {
-  const burnIndices = transactionReceipt.logs.reduce((acc: number[], log, index) => {
-    // Check topics[0] to find a transfer of the correct asset type e.g. ERC20
-    // Check topics[2] to filter out any transfers previous to the burn i.e. those not to the zero address
-    if (log.topics[0].toLowerCase() === logEventSig.toLowerCase() && log.topics[2].toLowerCase() === HashZero) {
+export const getLogIndex = (
+  transactionReceipt: TransactionReceipt,
+  logEventSig: EventSignature,
+  selectedBurn = 0,
+): number => {
+  const predicate = predicateMap[logEventSig];
+  const eventIndices = transactionReceipt.logs.reduce((acc: number[], log, index) => {
+    if (predicate(log.topics)) {
       acc.push(index);
     }
     return acc;
   }, []);
 
-  if (burnIndices.length === 0) {
+  if (eventIndices.length === 0) {
     throw new Error("Burn log not found in receipt");
   }
 
-  return burnIndices[selectedBurn];
+  return eventIndices[selectedBurn];
 };

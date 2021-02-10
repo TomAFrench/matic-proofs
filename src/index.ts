@@ -6,15 +6,12 @@ import { buildBlockProof } from "./proofs/blockProof";
 import { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
 import { getLogIndex } from "./utils/logIndex";
 import { hexToBuffer } from "./utils/buffer";
+import { EventSignature } from "./constants";
 
 export { buildBlockProof } from "./proofs/blockProof";
 export { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
 export { isBlockCheckpointed, isBurnTxCheckpointed, isBurnTxProcessed, isBurnTxClaimable } from "./checks";
-
-export const ERC20_TRANSFER_EVENT_SIG = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
-export const ERC721_TRANSFER_EVENT_SIG = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
-export const ERC1155_TRANSFER_SINGLE_EVENT_SIG = "0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62";
-export const ERC1155_TRANSFER_BATCH_EVENT_SIG = "0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb";
+export * from "./constants";
 
 export const encodePayload = ({
   headerBlockNumber,
@@ -51,7 +48,7 @@ export const buildPayloadForExit = async (
   maticChainProvider: JsonRpcProvider,
   rootChainContractAddress: string,
   burnTxHash: string,
-  logEventSigOrIndex: string,
+  logEventSig: EventSignature,
   selectedBurn = 0,
 ): Promise<ExitProof> => {
   // Check that we can actually confirm that the burn transaction exists
@@ -64,7 +61,7 @@ export const buildPayloadForExit = async (
     throw new Error("Could not find blockHash of burnTx");
   }
 
-  const logIndex = getLogIndex(burnTxReceipt, logEventSigOrIndex, selectedBurn);
+  const logIndex = getLogIndex(burnTxReceipt, logEventSig, selectedBurn);
 
   // Build proof that the burn transaction is included in this block.
   const { receipt, parentNodes, path } = await buildReceiptProof(maticChainProvider, burnTxHash);

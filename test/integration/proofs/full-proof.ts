@@ -4,7 +4,7 @@ import { deployments, ethers } from "hardhat";
 
 import { JsonRpcProvider } from "@ethersproject/providers";
 import chai from "../../chai-setup";
-import { buildPayloadForExit, encodePayload, ERC20_TRANSFER_EVENT_SIG } from "../../../src";
+import { buildPayloadForExit, encodePayload, EventSignature } from "../../../src";
 import { getCheckpointManager } from "../../../src/utils/contracts";
 
 const { expect } = chai;
@@ -38,7 +38,7 @@ export function testFullProof(): void {
         maticProvider,
         rootChainManagerProxy,
         burnHash,
-        ERC20_TRANSFER_EVENT_SIG,
+        EventSignature.ERC20Transfer,
       );
 
       // Pull checkpoint from mainnet and insert it onto local chain

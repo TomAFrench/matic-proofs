@@ -2,7 +2,7 @@
 import { Contract } from "@ethersproject/contracts";
 import { deployments, ethers } from "hardhat";
 
-import { encodePayload, ERC20_TRANSFER_EVENT_SIG } from "../../../src";
+import { encodePayload, EventSignature } from "../../../src";
 import { buildMerkleProof } from "../../../src/proofs/blockProof";
 import { buildMerklePatriciaProof } from "../../../src/proofs/receiptProof";
 import { ExitProof } from "../../../src/types";
@@ -24,7 +24,7 @@ export function testFullProof(): void {
   it("should generate a valid proof", async () => {
     const receiptProof = await buildMerklePatriciaProof(receipt, receipts, block.number, block.hash);
     const blockProof = await buildMerkleProof(block, blocks, CHECKPOINT_ID);
-    const logIndex = getLogIndex(receipt, ERC20_TRANSFER_EVENT_SIG);
+    const logIndex = getLogIndex(receipt, EventSignature.ERC20Transfer);
 
     const exitProof: ExitProof = {
       headerBlockNumber: CHECKPOINT_ID.toNumber(),
