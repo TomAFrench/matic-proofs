@@ -10,7 +10,13 @@ import { EventSignature } from "./constants";
 
 export { buildBlockProof } from "./proofs/blockProof";
 export { buildReceiptProof, getReceiptBytes } from "./proofs/receiptProof";
-export { isBlockCheckpointed, isBurnTxCheckpointed, isBurnTxProcessed, isBurnTxClaimable } from "./checks";
+export {
+  isBlockCheckpointed,
+  isBurnTxCheckpointed,
+  isBurnTxProcessed,
+  isBurnTxClaimable,
+  isRootTxStateSynced,
+} from "./checks";
 export * from "./constants";
 
 export const encodePayload = ({

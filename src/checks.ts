@@ -7,7 +7,7 @@ import { buildMerklePatriciaProof } from "./proofs/receiptProof";
 import { getFullBlockByHash } from "./utils/blocks";
 import { getLogIndex } from "./utils/logIndex";
 import { RequiredBlockMembers } from "./types";
-import { getCheckpointManager, getRootChainManager } from "./utils/contracts";
+import { getCheckpointManager, getRootChainManager, getStateReceiver } from "./utils/contracts";
 import { hexToBuffer } from "./utils/buffer";
 import { EventSignature } from "./constants";
 
@@ -140,4 +140,26 @@ export const isBurnTxClaimable = async (
 
   // Withdrawal can be claimed if it is checkpointed and hasn't already been claimed
   return checkpointed && !alreadyClaimed;
+};
+
+/**
+ * Check whether a root chain transaction which has sent state to the child chain has been synced.
+ * @param rootChainProvider - a Provider for the root chain (Ethereum)
+ * @param maticChainProvider - a Provider for the child chain (Matic)
+ * @param txHash - The hash of the transaction of interest on the child chain
+ */
+export const isRootTxStateSynced = async (
+  rootChainProvider: Provider,
+  maticChainProvider: Provider,
+  txHash: string,
+): Promise<boolean> => {
+  const txReceipt = await rootChainProvider.getTransactionReceipt(txHash);
+  const stateReceiver = getStateReceiver(maticChainProvider);
+  const childCounter = await stateReceiver.lastStateId();
+
+  const STATE_SYNCED_LOG = "0x103fed9db65eac19c4d870f49ab7520fe03b99f1838e5996caf47e9e43308392";
+  const stateSyncedLog = txReceipt.logs.find(log => log.topics[0] === STATE_SYNCED_LOG);
+  if (stateSyncedLog === undefined) return false;
+  const rootCounter = stateSyncedLog.topics[1];
+  return BigNumber.from(childCounter).gte(rootCounter);
 };

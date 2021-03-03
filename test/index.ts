@@ -9,6 +9,7 @@ import { testFullProof as testFullProofOnchain } from "./proofs/onchain/full-pro
 import { testFindBlockCheckpointId } from "./integration/dataFetching/findCheckpoint";
 import { testCalculateExitHash } from "./integration/dataFetching/calculateExitHash";
 import { testFullProof as testFullProofOnchainIntegration } from "./integration/proofs/full-proof";
+import { testIsRootTxStateSynced } from "./integration/dataFetching/isRootTxStateSynced";
 
 describe("Unit tests", function () {
   describe("Proofs", function () {
@@ -49,6 +50,9 @@ describe("Integration tests", function () {
     });
     describe("calculateExitHash", function () {
       testCalculateExitHash();
+    });
+    describe("isRootTxStateSynced", function () {
+      testIsRootTxStateSynced();
     });
   });
   describe("Proofs", function () {
